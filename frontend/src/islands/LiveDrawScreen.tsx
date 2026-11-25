@@ -41,7 +41,7 @@ function DigitReel({ digit, rolling, delay, reduce }: { digit: number; rolling: 
 
 function Confetti() {
   // Fixed pieces (position, colour, timing from the index): a burst, not a random effect.
-  const colours = ["#FF2DAA", "#22E6FF", "#FFF23A", "#FFFFFF", "#9B5CFF"];
+  const colours = ["#FF1E8C", "#3FD8FF", "#FF6FD0", "#FFFFFF", "#00D2F5"];
   return (
     <div className="ld-confetti" aria-hidden="true">
       {Array.from({ length: 90 }, (_, i) => (
