@@ -1,7 +1,7 @@
 @php($t = $this->totals())
 @php($rows = $this->draws())
 <x-filament-panels::page>
-    <p style="opacity:.75;margin:0">Gimme Box is <b>{{ $t['on'] ? 'ON' : 'OFF' }}</b> (Settings → Gimme Box). Paid orders only for tickets and bonus.</p>
+    <p style="opacity:.75;margin:0">Lucky Dip is <b>{{ $t['on'] ? 'ON' : 'OFF' }}</b> (Settings → Lucky Dip). Paid orders only for tickets and bonus.</p>
     <x-filament::section heading="Boxes">
         <div style="display:flex;flex-wrap:wrap;gap:28px">
             @foreach ([['Shaken', number_format($t['built'])], ['Added to basket', number_format($t['added']).' ('.$t['addRate'].')'], ['Paid for', number_format($t['paid']).' ('.$t['payRate'].' of added)'], ['Average paid box', $t['avgValue']], ['Bonus tickets given', number_format($t['bonus'])]] as [$label, $value])
@@ -14,7 +14,7 @@
     </x-filament::section>
     <x-filament::section heading="By draw">
         @if (! $rows)
-            No paid Gimme Box tickets yet.
+            No paid Lucky Dip tickets yet.
         @else
             <table style="width:100%;font-size:14px;border-collapse:collapse">
                 <thead><tr style="text-align:left;opacity:.6"><th style="padding:6px 0">Draw</th><th>Box tickets</th><th>Of which bonus</th><th>All tickets sold</th><th>Share from boxes</th></tr></thead>

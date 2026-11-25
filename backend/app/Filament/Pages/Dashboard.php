@@ -18,6 +18,6 @@ class Dashboard extends BaseDashboard
 
     public function getSubheading(): ?string
     {
-        return now('Europe/London')->format('l j F Y').' · here is how Gimme Gimme is doing';
+        return now('Europe/London')->format('l j F Y').' · here is how Easy Peasy is doing';
     }
 }

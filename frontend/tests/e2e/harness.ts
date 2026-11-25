@@ -32,7 +32,7 @@ async function waitFor(url: string, ms = 20000) {
  * server, with a fresh SQLite database seeded by DemoSeeder, the fake payment gateway and Verity's
  * local beacon.
  */
-/** `features`: switch Gimme Box and Refer a Friend on in the Laravel test database (they start off, as on the real site). */
+/** `features`: switch Lucky Dip and Refer a Friend on in the Laravel test database (they start off, as on the real site). */
 export async function startSite(backend: "mock" | "laravel" = "mock", opts: { features?: boolean; pixel?: string } = {}): Promise<Site> {
   const [apiPort, astroPort, proxyPort] = [await free(), await free(), await free()];
   const origin = `http://127.0.0.1:${proxyPort}`;

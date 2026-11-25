@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Gimme Box (a lucky-dip basket builder) and Refer a Friend. Both are switched off by default
+ * Lucky Dip (a lucky-dip basket builder) and Refer a Friend. Both are switched off by default
  * (settings feature_gimme_box, feature_referrals). Bonus credit reuses the wallet's bonus balance.
  */
 return new class extends Migration
@@ -34,7 +34,7 @@ return new class extends Migration
         });
 
         Schema::table('order_lines', function (Blueprint $t) {
-            $t->unsignedInteger('bonus_quantity')->default(0); // Gimme Box bonus tickets, free, inside quantity
+            $t->unsignedInteger('bonus_quantity')->default(0); // Lucky Dip bonus tickets, free, inside quantity
             $t->string('source', 16)->nullable();              // gimme_box | voucher
             $t->string('gimme_box_id', 40)->nullable()->index();
         });

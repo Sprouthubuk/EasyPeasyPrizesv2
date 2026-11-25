@@ -8,9 +8,9 @@
 <meta name="supported-color-schemes" content="dark">
 <style>
 /* The site's own fonts, from the site itself (Apple Mail and some apps show them; others use the fallbacks). */
-@font-face { font-family: 'Lilita One'; src: url('{{ rtrim((string) config('app.frontend_url'), '/') }}/fonts/lilita-one-latin.woff2') format('woff2'); font-weight: 400; font-display: swap; }
-@font-face { font-family: 'Nunito'; src: url('{{ rtrim((string) config('app.frontend_url'), '/') }}/fonts/nunito-latin.woff2') format('woff2'); font-weight: 400 900; font-display: swap; }
-body { background-color: #07050b; }
+@font-face { font-family: Sora; src: url('{{ rtrim((string) config('app.frontend_url'), '/') }}/fonts/sora-latin.woff2') format('woff2'); font-weight: 100 800; font-display: swap; }
+@font-face { font-family: 'Manrope'; src: url('{{ rtrim((string) config('app.frontend_url'), '/') }}/fonts/manrope-latin.woff2') format('woff2'); font-weight: 200 800; font-display: swap; }
+body { background-color: #05060E; }
 @media only screen and (max-width: 600px) {
 .inner-body {
 width: 100% !important;
@@ -33,9 +33,9 @@ width: 100% !important;
 </style>
 {!! $head ?? '' !!}
 </head>
-<body style="background-color:#07050b;">
+<body style="background-color:#05060E;">
 
-<table class="wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation" bgcolor="#07050b">
+<table class="wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation" bgcolor="#05060E">
 <tr>
 <td align="center">
 <table class="content" width="100%" cellpadding="0" cellspacing="0" role="presentation">

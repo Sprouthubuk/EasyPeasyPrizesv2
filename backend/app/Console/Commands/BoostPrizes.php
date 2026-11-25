@@ -20,13 +20,18 @@ use Sprouthub\Verity\Support\InstantAdditionTable;
  */
 class BoostPrizes extends Command
 {
-    protected $signature = 'competitions:boost-prizes {--batch=2026-11-23} {--dry-run} {--verify : check boosts already added} {--only= : one competition slug}';
+    protected $signature = 'competitions:boost-prizes {--batch= : the list in resources/boosts/YYYY-MM-DD.php} {--dry-run} {--verify : check boosts already added} {--only= : one competition slug}';
 
     protected $description = 'Add extra instant prizes to live instant-win competitions, through Verity (prize boost)';
 
     public function handle(PrizeBoosts $boosts): int
     {
         $batch = (string) $this->option('batch');
+        if ($batch === '') {
+            $this->error('Name the list: --batch=YYYY-MM-DD (resources/boosts/YYYY-MM-DD.php).');
+
+            return self::FAILURE;
+        }
         $plan = PrizeBoosts::batch($batch);
         if ($this->option('verify')) {
             return $this->verify($batch, $plan);

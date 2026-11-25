@@ -161,7 +161,7 @@ function price(lines, u, promoCode) {
     const q = Math.max(1, Math.floor(Number(l.quantity) || 1));
     out.push({ ...base, quantity: q, bundleId: null, bundleLabel: null, paidQuantity: q, freeQuantity: 0, linePence: q * c.pricePence, problem: q > max ? "Not that many tickets are left. Please choose fewer." : null, upgrade: nextUp(q, q) });
   }
-  // Gimme Box bonus: the box's extra tickets, while the line still holds what the box packed.
+  // Lucky Dip bonus: the box's extra tickets, while the line still holds what the box packed.
   for (const l of out) {
     const src = (lines || []).find((x) => x.competitionId === l.competitionId && !!x.bundleId === !!l.bundleId);
     const box = src?.boxId ? boxes.get(src.boxId) : null;
@@ -177,7 +177,7 @@ function price(lines, u, promoCode) {
   return { lines: out, totalPence, ticketCount: out.reduce((n, l) => n + l.quantity, 0), promo, walletCanPayPence: u ? Math.min(total(u), totalPence) : 0, walletCovers: !!u && total(u) >= totalPence && totalPence > 0, problems };
 }
 
-// Gimme Box: packs live draws with bundles first, then singles, never over the budget.
+// Lucky Dip: packs live draws with bundles first, then singles, never over the budget.
 const boxes = new Map();
 function packBox(budget, mode, seed) {
   const live = COMPS.filter((c) => c.type === "draw" && c.status === "live");
@@ -246,7 +246,7 @@ const route = (method, pattern, fn) => routes.push({ method, re: new RegExp(`^${
 
 route("GET", "/sanctum/csrf-cookie", (req, res) => { res.writeHead(204, { "Set-Cookie": `XSRF-TOKEN=${crypto.randomBytes(12).toString("hex")}; Path=/; SameSite=Lax` }); res.end(); });
 route("GET", "/api/health", (req, res) => send(res, 200, { status: "ok", checks: { database: "ok", scheduler: "ok" } }));
-route("GET", "/api/site", (req, res) => send(res, 200, { salesOpen: true, minDepositPence: 500, minCardPence: 100, minWithdrawalPence: 2000, maxTopUpPence: 50000, featuredSlug: "bush-bucks-jungle-trial", socials: { instagram: "https://instagram.com/gimmegimmeprizes", facebook: "https://facebook.com/groups/gimmegimmeprizes" }, supportEmail: "hello@gimmegimmeprizes.co.uk", metaPixelId: process.env.MOCK_PIXEL_ID ?? null,
+route("GET", "/api/site", (req, res) => send(res, 200, { salesOpen: true, minDepositPence: 500, minCardPence: 100, minWithdrawalPence: 2000, maxTopUpPence: 50000, featuredSlug: "bush-bucks-jungle-trial", socials: { instagram: "https://instagram.com/gimmegimmeprizes", facebook: "https://facebook.com/groups/gimmegimmeprizes" }, supportEmail: "hello@easypeasyprizes.com", metaPixelId: process.env.MOCK_PIXEL_ID ?? null,
   // Both features are on in the mock so the pages can be seen and tested; the real site starts with them off.
   gimmeBox: process.env.MOCK_FEATURES === "off" ? null : { available: true, chipsPence: [500, 1000, 2000, 5000], minPence: 500, maxPence: 10000, bonusPct: 10 },
   referrals: process.env.MOCK_FEATURES === "off" ? null : { rewardType: "tickets", rewardTickets: 10, rewardCreditPence: 200, minPurchasePence: 500 } }));
@@ -302,7 +302,7 @@ route("GET", "/api/archive/:slug/instant-wins", (req, res) => send(res, 200, { d
 route("GET", "/api/archive/:slug/entries", (req, res) => send(res, 200, { data: [{ ticket: 1, name: "Sam K.", source: "paid", prizeName: null }, { ticket: 2, name: "Entrant", source: "postal", prizeName: null }], hasMore: false }));
 route("GET", "/api/entry-lists", (req, res) => send(res, 200, { data: COMPS }));
 route("GET", "/api/entry-lists/:slug", (req, res, { params }) => { const c = bySlug.get(params.slug); return c ? send(res, 200, { competition: c, data: [{ ticket: 1, name: "N***** B.", source: "paid", prizeName: null }, { ticket: 2, name: "E**** A.", source: "postal", prizeName: c.type === "instant" ? "Bug Bite" : null }], hasMore: false }) : fail(res, 404, "Not found"); });
-route("GET", "/api/pages/:slug", (req, res, { params }) => send(res, 200, { title: { terms: "Terms & Conditions", privacy: "Privacy Policy", cookies: "Cookie Policy", complaints: "Complaints", "free-entry": "Free Entry Terms" }[params.slug] ?? "Page", updatedAt: iso(now - 10 * DAY), version: "1.0", html: `<h2 id="about">1. About Us</h2><p>Gimme Gimme Prizes is a trading name of GIMMEGIMMEPRIZES LTD.</p><h2 id="who">2. Who Can Enter</h2><p>UK residents aged 18 or over.</p>`, headings: [{ id: "about", text: "1. About Us" }, { id: "who", text: "2. Who Can Enter" }] }));
+route("GET", "/api/pages/:slug", (req, res, { params }) => send(res, 200, { title: { terms: "Terms & Conditions", privacy: "Privacy Policy", cookies: "Cookie Policy", complaints: "Complaints", "free-entry": "Free Entry Terms" }[params.slug] ?? "Page", updatedAt: iso(now - 10 * DAY), version: "1.0", html: `<h2 id="about">1. About Us</h2><p>Easy Peasy Prizes is a trading name of Easy Peasy Prizes Ltd.</p><h2 id="who">2. Who Can Enter</h2><p>UK residents aged 18 or over.</p>`, headings: [{ id: "about", text: "1. About Us" }, { id: "who", text: "2. Who Can Enter" }] }));
 route("POST", "/api/contact", async (req, res) => { const b = await readJson(req); if (!b.message || String(b.message).length < 10) return fail(res, 422, "Please check the form.", { message: ["Tell us a bit more (at least 10 characters)."] }); send(res, 201, { ok: true }); });
 route("POST", "/api/basket/price", async (req, res, { user }) => { const b = await readJson(req); send(res, 200, price(b.lines, user, b.promoCode)); });
 

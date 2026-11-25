@@ -41,7 +41,7 @@ final class Pricing
             }
         }
         $ids = array_values(array_unique([...array_keys($singles), ...array_keys($bundleIds)]));
-        // Gimme Boxes in the basket: their own holds don't count against them, and their bonus tickets apply
+        // Lucky Dips in the basket: their own holds don't count against them, and their bonus tickets apply
         // while the basket still holds what the box packed (a released or paid box gives no bonus).
         $boxes = $boxIds ? GimmeBox::query()->whereIn('id', array_unique($boxIds))->whereNotIn('status', ['released', 'paid'])->get()->keyBy('id') : collect();
         $this->state->ignoreBoxes($boxes->keys()->all());
@@ -188,7 +188,7 @@ final class Pricing
     }
 
     /**
-     * The free bonus tickets a Gimme Box adds to one competition: only while the basket still holds what
+     * The free bonus tickets a Lucky Dip adds to one competition: only while the basket still holds what
      * the box packed there (the same bundle, at least its single tickets), capped by what's left and by
      * the competition's biggest-bundle share. Never on an instant-win game.
      */

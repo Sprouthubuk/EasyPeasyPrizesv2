@@ -8,7 +8,7 @@ use App\Models\OrderLine;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * The per-draw cap on promotional free tickets: referral voucher tickets and Gimme Box bonus tickets,
+ * The per-draw cap on promotional free tickets: referral voucher tickets and Lucky Dip bonus tickets,
  * counted together, at most `promo_ticket_cap_pct` % of the draw's tickets (rounded down).
  *
  * Counted: paid orders, and unpaid ones still inside their hold (so two baskets can't both take the

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * Builds, holds and releases Gimme Boxes. A box holds its tickets for gimme_box_hold_minutes so the
+ * Builds, holds and releases Lucky Dips. A box holds its tickets for gimme_box_hold_minutes so the
  * price shown is honoured; shaking again releases the old box first. Paying goes through the normal
  * basket and checkout (Pricing / Orders), which re-check everything.
  */
@@ -20,7 +20,7 @@ final class GimmeBoxes
     public function build(int $budget, string $mode, ?User $user, ?string $replaces = null, ?int $seed = null): GimmeBox
     {
         if (! Settings::gimmeBoxOn()) {
-            throw new RefusedException('The Gimme Box is not available right now.', 'gimme_box_off');
+            throw new RefusedException('The Lucky Dip is not available right now.', 'gimme_box_off');
         }
         $min = Settings::bounded('gimme_box_min_pence', 100, 100000);
         $max = max($min, Settings::bounded('gimme_box_max_pence', 100, 100000));

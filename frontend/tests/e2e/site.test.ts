@@ -27,7 +27,7 @@ const PUBLIC_PAGES: [string, RegExp][] = [
   ["/free-entry", /Free Postal Entry/],
   ["/legal/terms", /Terms &(amp;)? Conditions/],
   ["/menu", /All Competitions/],
-  ["/join", /Join Gimme Gimme/],
+  ["/join", /Join Easy Peasy/],
   ["/login", /Welcome Back/],
   ["/forgot-password", /Reset Password/],
   ["/basket", /Your Basket/],
@@ -46,7 +46,7 @@ describe("every public page renders", () => {
       expect(t).toMatch(expected);
       expect(t).not.toMatch(/\bundefined\b|\bNaN\b|\[object Object\]/);
       expect(html).toContain('<html lang="en-GB">');
-      if (!NO_FOOTER.has(path)) expect(html).toContain("GIMMEGIMMEPRIZES LTD"); // company details in the footer
+      if (!NO_FOOTER.has(path)) expect(html).toContain("Easy Peasy Prizes Ltd"); // company details in the footer
     });
   }
 });
@@ -159,8 +159,8 @@ describe("site-wide rules", () => {
     const demo = await b.page("/demo/slots?skin=christmas&embed=1");
     expect(demo.res.headers.get("x-frame-options")).toBe("SAMEORIGIN");
     expect(demo.html).not.toContain('class="hd"'); // no header
-    expect(demo.html).not.toContain("GIMMEGIMMEPRIZES LTD"); // no footer
-    expect((await b.page("/demo/slots")).html).toContain("GIMMEGIMMEPRIZES LTD");
+    expect(demo.html).not.toContain("Easy Peasy Prizes Ltd"); // no footer
+    expect((await b.page("/demo/slots")).html).toContain("Easy Peasy Prizes Ltd");
     expect((await b.page("/")).res.headers.get("x-frame-options")).toBe("DENY");
   });
   it("a live draw's page shows its bundles, Our Pick first choice, and its ticket counts", async () => {

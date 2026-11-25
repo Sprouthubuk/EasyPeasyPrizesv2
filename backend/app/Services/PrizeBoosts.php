@@ -24,7 +24,8 @@ final class PrizeBoosts
     /** @return array{reason: string, competitions: array<string, list<array{0:int,1:int,2:string}>>} */
     public static function batch(string $batch): array
     {
-        if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $batch) || ! is_file($file = resource_path("boosts/{$batch}.php"))) {
+        $dir = rtrim((string) (config('prize_boosts.path') ?: resource_path('boosts')), '/');
+        if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $batch) || ! is_file($file = "{$dir}/{$batch}.php")) {
             throw new RuntimeException("No prize boost list for {$batch} (resources/boosts/{$batch}.php).");
         }
 

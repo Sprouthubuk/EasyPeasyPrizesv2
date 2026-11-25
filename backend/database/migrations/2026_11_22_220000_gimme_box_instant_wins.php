@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Instant-win games can now go in a Gimme Box, but only once an admin switches them on: every existing
+ * Instant-win games can now go in a Lucky Dip, but only once an admin switches them on: every existing
  * instant-win game starts switched off (owner, 22 Nov 2026). Live draws are not touched. Not a published
  * term (Competition::LOCKED_WHEN_PUBLISHED), so changing it on a published game is allowed.
  */

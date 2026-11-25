@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
- * The per-draw cap on promotional free tickets: referral voucher tickets and Gimme Box bonus tickets
+ * The per-draw cap on promotional free tickets: referral voucher tickets and Lucky Dip bonus tickets
  * together never pass `promo_ticket_cap_pct` of a draw. Postal entries are never capped or counted.
  */
 class PromoCapTest extends TestCase
@@ -188,7 +188,7 @@ class PromoCapTest extends TestCase
                 $this->assertStringNotContainsString($key, $json);
             }
         }
-        // Competition pages and the draw picker show the ticket counts (owner, 22 Nov 2026); the Gimme Box and basket don't need them.
+        // Competition pages and the draw picker show the ticket counts (owner, 22 Nov 2026); the Lucky Dip and basket don't need them.
         foreach ([$box, $price] as $json) {
             foreach (['ticketsLeft', 'maxTickets', 'max_tickets'] as $key) {
                 $this->assertStringNotContainsString($key, $json);

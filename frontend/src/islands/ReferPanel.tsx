@@ -80,7 +80,7 @@ export default function ReferPanel({ initial }: { initial: MyReferrals }) {
   const [data, setData] = useState(initial);
   const [copied, setCopied] = useState(false);
   const reward = data.rewardType === "credit" ? `${formatMoney(data.rewardCreditPence)} bonus credit` : `${data.rewardTickets} free tickets`;
-  const message = `Join me on Gimme Gimme Prizes: spend ${formatPence(data.minPurchasePence)} on your first order and we both get ${reward}. 18+ UK.`;
+  const message = `Join me on Easy Peasy Prizes: spend ${formatPence(data.minPurchasePence)} on your first order and we both get ${reward}. 18+ UK.`;
   const canShare = typeof navigator !== "undefined" && typeof navigator.share === "function";
 
   async function copy() {
@@ -93,7 +93,7 @@ export default function ReferPanel({ initial }: { initial: MyReferrals }) {
   }
   async function share() {
     try {
-      await navigator.share({ title: "Gimme Gimme Prizes", text: message, url: data.link });
+      await navigator.share({ title: "Easy Peasy Prizes", text: message, url: data.link });
       trackCustom("ReferralShare", { via: "share" });
     } catch { /* cancelled */ }
   }
@@ -112,7 +112,7 @@ export default function ReferPanel({ initial }: { initial: MyReferrals }) {
         <div className="r2">
           {canShare ? <button type="button" className="btn btn-y gg-cta" onClick={share}><Svg name="share" size={16} /> Share</button>
             : <a className="btn btn-y gg-cta" href={`https://wa.me/?text=${text}`} target="_blank" rel="noopener noreferrer" onClick={() => trackCustom("ReferralShare", { via: "whatsapp" })}>WhatsApp</a>}
-          <a className="btn btn-o" href={`mailto:?subject=${encodeURIComponent("Join me on Gimme Gimme")}&body=${text}`} onClick={() => trackCustom("ReferralShare", { via: "email" })}>Email</a>
+          <a className="btn btn-o" href={`mailto:?subject=${encodeURIComponent("Join me on Easy Peasy")}&body=${text}`} onClick={() => trackCustom("ReferralShare", { via: "email" })}>Email</a>
         </div>
       </div>
 

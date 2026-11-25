@@ -36,7 +36,7 @@ class AdminPanelProvider extends PanelProvider
             // Every admin signs in with a code from an authenticator app as well as the password; the first time,
             // Filament walks them through setting it up and gives recovery codes. Lost phone: gimme:reset-two-step.
             ->multiFactorAuthentication([AppAuthentication::make()->recoverable()], isRequired: true)
-            ->brandName('Gimme Gimme Admin')
+            ->brandName('Easy Peasy Admin')
             // The site's look: near-black with neon pink, cyan and yellow, the logo and the site's own fonts
             // (served from public/css/filament/gimme, nothing third-party). Extra styling in public/css/filament/gimme/admin.css.
             ->brandLogo(fn () => view('filament.brand'))
@@ -44,14 +44,14 @@ class AdminPanelProvider extends PanelProvider
             ->favicon(asset('css/filament/gimme/favicon.png'))
             ->defaultAvatarProvider(InitialsAvatar::class)
             ->darkMode(true, true)
-            ->font('Nunito', url: asset('css/filament/gimme/fonts.css'), provider: LocalFontProvider::class)
+            ->font('Manrope', url: asset('css/filament/gimme/fonts.css'), provider: LocalFontProvider::class)
             ->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('17rem')
             ->maxContentWidth(Width::ScreenTwoExtraLarge)
             ->spa()
             ->colors([
-                'primary' => Color::hex('#ff2daa'),
-                'info' => Color::hex('#22e6ff'),
+                'primary' => Color::hex('#FF1E8C'),
+                'info' => Color::hex('#3FD8FF'),
                 'success' => Color::hex('#2fe08b'),
                 'warning' => Color::hex('#ffd23a'),
                 'danger' => Color::hex('#ff4d6d'),

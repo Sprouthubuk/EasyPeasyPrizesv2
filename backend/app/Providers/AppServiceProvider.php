@@ -57,21 +57,21 @@ class AppServiceProvider extends ServiceProvider
             ['id' => $user->getKey(), 'hash' => sha1($user->getEmailForVerification())]));
 
         // Our own wording for the two account emails (Laravel's are generic). The design is the
-        // Gimme Gimme mail theme (resources/views/vendor/mail).
+        // Easy Peasy mail theme (resources/views/vendor/mail).
         VerifyEmail::toMailUsing(fn ($user, string $url) => (new MailMessage)
             ->subject('Confirm Your Email')
             ->greeting('Hi '.($user->first_name ?: 'there').',')
-            ->line('Welcome to Gimme Gimme Prizes! Tap the button to confirm your email and finish setting up your account.')
+            ->line('Welcome to Easy Peasy Prizes! Tap the button to confirm your email and finish setting up your account.')
             ->action('Confirm My Email', $url)
             ->line('The link works for 24 hours. If you didn’t sign up, you can ignore this email and nothing will happen.')
-            ->salutation('The Gimme Gimme team'));
+            ->salutation('The Easy Peasy team'));
         ResetPassword::toMailUsing(fn ($user, string $token) => (new MailMessage)
             ->subject('Reset Your Password')
             ->greeting('Hi '.($user->first_name ?: 'there').',')
-            ->line('We got a request to reset the password for your Gimme Gimme account.')
+            ->line('We got a request to reset the password for your Easy Peasy account.')
             ->action('Choose A New Password', $site.'/reset-password?token='.urlencode($token).'&email='.urlencode($user->email))
             ->line('The link works for '.(int) config('auth.passwords.'.config('auth.defaults.passwords').'.expire', 60).' minutes. If you didn’t ask for this, ignore this email: your password stays the same.')
-            ->salutation('The Gimme Gimme team'));
+            ->salutation('The Easy Peasy team'));
 
         RateLimiter::for('login', fn (Request $r) => [Limit::perMinute(5)->by('login|'.strtolower(trim((string) $r->input('email'))).'|'.$r->ip()), Limit::perMinute(30)->by('login|'.$r->ip())]);
         RateLimiter::for('password', fn (Request $r) => [Limit::perHour(5)->by('pw|'.strtolower(trim((string) $r->input('email')))), Limit::perHour(30)->by('pw|'.$r->ip())]);

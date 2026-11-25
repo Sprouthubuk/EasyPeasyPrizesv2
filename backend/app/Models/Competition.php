@@ -47,7 +47,7 @@ class Competition extends Model
                 PictureSizes::make($c->image);
             }
         });
-        // An instant-win game starts out of the Gimme Box unless switched on (owner, 22 Nov 2026).
+        // An instant-win game starts out of the Lucky Dip unless switched on (owner, 22 Nov 2026).
         static::creating(function (Competition $c) {
             if ($c->type === 'instant' && ! array_key_exists('gimme_box_enabled', $c->getAttributes())) {
                 $c->gimme_box_enabled = false;

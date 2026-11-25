@@ -67,7 +67,7 @@ class CompetitionResource extends Resource
                     ->afterStateUpdated(fn (Set $set, Get $get, ?string $state, ?Competition $record) => $record ? null : $set('slug', Str::slug((string) $state))),
                 TextInput::make('slug')->required()->maxLength(120)->alphaDash()->unique(ignoreRecord: true)->helperText('The web address: /competitions/slug'),
                 Select::make('type')->options(['instant' => 'Instant win', 'draw' => 'Draw'])->required()->live()->disabled($locked)
-                    // A new draw starts in the Gimme Box, a new instant-win game starts out of it (owner, 22 Nov 2026).
+                    // A new draw starts in the Lucky Dip, a new instant-win game starts out of it (owner, 22 Nov 2026).
                     ->afterStateUpdated(fn (Set $set, ?string $state, ?Competition $record) => $record ? null : $set('gimme_box_enabled', $state === 'draw')),
                 Select::make('game')->label('Reveal game')->options(self::GAMES)->live()->visible(fn (Get $get) => $get('type') === 'instant')->required(fn (Get $get) => $get('type') === 'instant'),
                 // Presentation only: the result is decided before the game appears, whatever the skin.
@@ -110,15 +110,15 @@ class CompetitionResource extends Resource
                     Money::input('prize_cost_pence', 'Prize cost (admin only)')->live(onBlur: true),
                     Text::make(fn (Get $get, ?Competition $record) => self::marginText($get, $record))->columnSpanFull(),
                 ]),
-            Section::make('Gimme Box And Promo Tickets')->description('Whether the lucky-dip Gimme Box may put this competition in a box (prices stay the same as this page), and the most free promo tickets it can give.')
+            Section::make('Lucky Dip And Promo Tickets')->description('Whether the lucky-dip Lucky Dip may put this competition in a box (prices stay the same as this page), and the most free promo tickets it can give.')
                 ->visible(fn (Get $get) => in_array($get('type'), ['draw', 'instant'], true))->columns(2)->components([
-                    Toggle::make('gimme_box_enabled')->label('Can go in a Gimme Box')->default(fn (Get $get) => $get('type') !== 'instant')
+                    Toggle::make('gimme_box_enabled')->label('Can go in a Lucky Dip')->default(fn (Get $get) => $get('type') !== 'instant')
                         ->helperText(fn (Get $get) => $get('type') === 'instant' ? 'Paid tickets only: no bonus tickets on instant wins. Every box also has at least one live draw.' : null),
                     TextInput::make('gimme_box_weight')->label('How often it’s picked')->numeric()->minValue(0)->maxValue(5)->step(0.1)->default(1)->required()
-                        ->helperText('1 is normal, 2 twice as often, 0 never. Slow sellers get a boost on top (Settings → Gimme Box).'),
+                        ->helperText('1 is normal, 2 twice as often, 0 never. Slow sellers get a boost on top (Settings → Lucky Dip).'),
                     TextInput::make('promo_ticket_cap_pct')->label('Promo ticket cap (% of tickets)')->numeric()->minValue(0)->maxValue(100)->step(0.5)->default(5)->required()
                         ->live(onBlur: true)->visible(fn (Get $get) => $get('type') === 'draw')
-                        ->helperText('Referral voucher tickets and Gimme Box bonus tickets together never pass this. Free postal entries don’t count. Players never see the number.'),
+                        ->helperText('Referral voucher tickets and Lucky Dip bonus tickets together never pass this. Free postal entries don’t count. Players never see the number.'),
                 ]),
             Section::make('Prizes')->columns(2)->components([
                 TextInput::make('end_prize_name')->label(fn (Get $get) => $get('type') === 'instant' ? 'End prize (optional draw at the close)' : 'Prize')
@@ -169,7 +169,7 @@ class CompetitionResource extends Resource
     }
 
     /**
-     * Promo tickets (referral vouchers + Gimme Box bonus, PromoCap): how many so far against the cap, and
+     * Promo tickets (referral vouchers + Lucky Dip bonus, PromoCap): how many so far against the cap, and
      * the worst case if the whole cap is given away on top of the worst bundle mix.
      */
     private static function boxBonusText(Get $get, ?Competition $record, int $price, int $tickets, ?int $cost, array $tiers): string

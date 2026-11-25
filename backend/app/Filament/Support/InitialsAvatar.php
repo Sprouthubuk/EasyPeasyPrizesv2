@@ -14,8 +14,8 @@ final class InitialsAvatar implements AvatarProvider
         $name = trim((string) Filament::getNameForDefaultAvatar($record));
         $initials = collect(preg_split('/\s+/', $name) ?: [])->filter()->take(2)->map(fn ($w) => mb_strtoupper(mb_substr($w, 0, 1)))->implode('') ?: '?';
         $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">'
-            .'<stop offset="0" stop-color="#ff2daa"/><stop offset="1" stop-color="#22e6ff"/></linearGradient></defs>'
-            .'<rect width="64" height="64" rx="32" fill="url(#g)"/><text x="32" y="41" text-anchor="middle" font-family="Nunito, Arial, sans-serif" font-size="26" font-weight="800" fill="#07050b">'
+            .'<stop offset="0" stop-color="#FF1E8C"/><stop offset="1" stop-color="#3FD8FF"/></linearGradient></defs>'
+            .'<rect width="64" height="64" rx="32" fill="url(#g)"/><text x="32" y="41" text-anchor="middle" font-family="Manrope, Arial, sans-serif" font-size="26" font-weight="800" fill="#05060E">'
             .htmlspecialchars($initials, ENT_QUOTES | ENT_XML1).'</text></svg>';
 
         return 'data:image/svg+xml;base64,'.base64_encode($svg);

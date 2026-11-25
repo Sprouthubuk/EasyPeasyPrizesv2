@@ -63,7 +63,7 @@ describe("public pages from real data", () => {
   it("the admin is served through the same domain", async () => {
     const r = await fetch(site.origin + "/admin/login");
     expect(r.status).toBe(200);
-    expect(await r.text()).toContain("Gimme Gimme Admin");
+    expect(await r.text()).toContain("Easy Peasy Admin");
   });
 });
 
@@ -193,7 +193,7 @@ describe("buying and playing", () => {
   });
 });
 
-describe("Gimme Box and Refer a Friend start switched off", () => {
+describe("Lucky Dip and Refer a Friend start switched off", () => {
   it("the site, the pages and the API say nothing about them until an admin turns them on", async () => {
     const b = new Browser(site.origin);
     const s = (await b.api("/api/site")).body;

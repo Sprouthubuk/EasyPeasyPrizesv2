@@ -116,7 +116,7 @@ return [
     ],
 
     /*
-    | Notification emails use Laravel's Markdown layout with the Gimme Gimme theme
+    | Notification emails use Laravel's Markdown layout with the Easy Peasy theme
     | (resources/views/vendor/mail/html/themes/gimme.css).
     */
     'markdown' => [

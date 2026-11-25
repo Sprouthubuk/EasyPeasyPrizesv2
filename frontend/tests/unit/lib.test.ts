@@ -92,7 +92,7 @@ describe("basket", () => {
     expect(readBasket()).toEqual([{ competitionId: "other", quantity: 2 }, { competitionId: "x", quantity: 0, bundleId: 3 }]);
   });
 
-  it("a Gimme Box takes the place of the same kind of line for each draw and keeps its box id", () => {
+  it("a Lucky Dip takes the place of the same kind of line for each draw and keeps its box id", () => {
     const box = "a".repeat(32);
     addToBasket("x", 3);
     addToBasket("y", 2);
@@ -111,9 +111,9 @@ describe("basket", () => {
     expect(readBasket()).toEqual([{ competitionId: "q", quantity: 1 }]);
   });
 
-  it("explains Gimme Box bonus tickets on a line", () => {
-    expect(lineMakeup({ quantity: 27, paidQuantity: 10, freeQuantity: 15, bonusQuantity: 2 })).toBe("10 paid + 15 free + 2 Gimme Box bonus = 27 tickets");
-    expect(lineMakeup({ quantity: 11, paidQuantity: 10, bonusQuantity: 1 })).toBe("10 paid + 1 Gimme Box bonus = 11 tickets");
+  it("explains Lucky Dip bonus tickets on a line", () => {
+    expect(lineMakeup({ quantity: 27, paidQuantity: 10, freeQuantity: 15, bonusQuantity: 2 })).toBe("10 paid + 15 free + 2 Lucky Dip bonus = 27 tickets");
+    expect(lineMakeup({ quantity: 11, paidQuantity: 10, bonusQuantity: 1 })).toBe("10 paid + 1 Lucky Dip bonus = 11 tickets");
   });
 
   it("puts the basket aside for a card payment and restores it once", () => {
@@ -143,9 +143,9 @@ describe("search titles and descriptions", async () => {
   it("keeps titles within 60 characters and says Win once", () => {
     expect(seo.competitionTitle({ title: "Win A Tesla" })).toBe("Win A Tesla");
     expect(seo.competitionTitle({ title: "£250 Cash" })).toBe("Win £250 Cash");
-    expect(seo.pageTitle("Short")).toBe("Short | Gimme Gimme Prizes");
+    expect(seo.pageTitle("Short")).toBe("Short | Easy Peasy Prizes");
     expect(seo.pageTitle("A Very Long Competition Title That Goes On And On Forever")).toBe("A Very Long Competition Title That Goes On And On Forever");
-    expect(seo.pageTitle("Win Chris Cracker’s Christmas Cash Bang Bash")).toBe("Win Chris Cracker’s Christmas Cash Bang Bash | Gimme Gimme");
+    expect(seo.pageTitle("Win Chris Cracker’s Christmas Cash Bang Bash")).toBe("Win Chris Cracker’s Christmas Cash Bang Bash | Easy Peasy");
     expect(seo.pageTitle("x".repeat(80)).length).toBeLessThanOrEqual(60);
   });
   it("describes a competition with its price in pence, how it's won and the postal route, never a count", () => {

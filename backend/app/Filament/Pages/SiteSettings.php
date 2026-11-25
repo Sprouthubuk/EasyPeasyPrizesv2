@@ -96,8 +96,8 @@ class SiteSettings extends Page
                 TextInput::make('meta_test_event_code')->label('Meta test event code')->regex('/^[A-Za-z0-9]{4,20}$/')
                     ->helperText('From Events Manager → Test events (e.g. TEST12345). While set, server events show in Test events instead of counting in your ads. Clear it before ads go live.'),
             ]),
-            Section::make('Gimme Box')->description('Lucky-dip basket builder for live draws. Off until you switch it on; prices are always the competition page prices.')->columns(3)->collapsible()->components([
-                Toggle::make('feature_gimme_box')->label('Gimme Box on')->columnSpanFull()
+            Section::make('Lucky Dip')->description('Lucky-dip basket builder for live draws. Off until you switch it on; prices are always the competition page prices.')->columns(3)->collapsible()->components([
+                Toggle::make('feature_gimme_box')->label('Lucky Dip on')->columnSpanFull()
                     ->helperText('Shows the home page section, /gimme-box and the small links. It only appears when at least two live draws can go in a box.'),
                 TextInput::make('gimme_box_chips')->label('Budget buttons (pence, comma separated)')->regex('/^\d{3,6}(,\d{3,6}){0,5}$/')->required()->columnSpan(2),
                 TextInput::make('gimme_box_bonus_pct')->label('Bonus tickets (%)')->integer()->minValue(0)->maxValue(50)->required()
@@ -109,7 +109,7 @@ class SiteSettings extends Page
                 TextInput::make('gimme_box_slow_boost_pct')->label('Slow-seller boost (%)')->integer()->minValue(100)->maxValue(400)->required()
                     ->helperText('Draws selling slower than expected are this much more likely to be picked.'),
                 TextInput::make('gimme_box_share_of_sales_pct')->label('Report warning above (% of sales)')->integer()->minValue(1)->maxValue(100)->required()
-                    ->helperText('The Gimme Box report flags a draw where boxes are more than this share of its tickets.'),
+                    ->helperText('The Lucky Dip report flags a draw where boxes are more than this share of its tickets.'),
             ]),
             Section::make('Refer A Friend')->description('Off until you switch it on. Load the draft terms first: php artisan gimme:legal-pages --drafts, then edit them in Pages.')->columns(3)->collapsible()->components([
                 Toggle::make('feature_referrals')->label('Refer a Friend on')->columnSpanFull(),
@@ -168,7 +168,7 @@ class SiteSettings extends Page
                     return;
                 }
                 try {
-                    // The real design (Gimme Gimme mail theme), sent now rather than queued, so a failure shows here.
+                    // The real design (Easy Peasy mail theme), sent now rather than queued, so a failure shows here.
                     \Illuminate\Support\Facades\Notification::route('mail', $data['to'])->notifyNow(new \App\Notifications\TestEmail);
                 } catch (\Throwable $e) {
                     AdminAction::record(auth()->user(), 'email.test_failed', null, null, ['mailer' => $mailer]);

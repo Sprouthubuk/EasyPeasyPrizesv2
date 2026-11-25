@@ -22,7 +22,7 @@ export function Header({ title, counter, balancePence, onClose, closeLabel }: He
         </svg>
       </button>
       <div className="rg-header-mid">
-        <img className="rg-brand-logo" src={logo} alt="Gimme Gimme Prizes" width={60} height={40} />
+        <img className="rg-brand-logo" src={logo} alt="Easy Peasy Prizes" width={60} height={40} />
         {title && <div className="rg-comp-title">{title}</div>}
         <h2 className="rg-counter">{counter}</h2>
       </div>

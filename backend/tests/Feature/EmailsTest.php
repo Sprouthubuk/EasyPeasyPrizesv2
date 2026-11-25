@@ -22,7 +22,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Tests\TestCase;
 
-/** Every email the site sends: Gimme Gimme design, our own wording, Title Case subjects, safe text. */
+/** Every email the site sends: Easy Peasy design, our own wording, Title Case subjects, safe text. */
 class EmailsTest extends TestCase
 {
     private function render(Notification $n, $user): array
@@ -46,12 +46,12 @@ class EmailsTest extends TestCase
         $this->assertStringContainsString('18+ UK only', $html);
         $this->assertStringContainsString('Free postal entry', $html);
         $this->assertStringContainsString($site.'/account/safer-play', $html);
-        $this->assertStringContainsString('background-color: #fff23a', $html, 'the site\'s yellow button');
-        $this->assertStringContainsString('border: 2px solid #ff2daa', $html, 'the neon pink card');
-        $this->assertStringContainsString('#07050b', $html, 'dark site background');
+        $this->assertStringContainsStringIgnoringCase('background-color: #ff1e8c', $html, 'the site\'s pink button');
+        $this->assertStringContainsStringIgnoringCase('border: 2px solid #ff1e8c', $html, 'the pink card');
+        $this->assertStringContainsStringIgnoringCase('#05060e', $html, 'dark site background');
         $this->assertStringNotContainsStringIgnoringCase('laravel', $html);
         $this->assertStringNotContainsString('All rights reserved', $html);
-        $this->assertStringContainsString('The Gimme Gimme team', $html);
+        $this->assertStringContainsString('The Easy Peasy team', $html);
     }
 
     private function assertTitleCase(string $subject): void
@@ -124,7 +124,7 @@ class EmailsTest extends TestCase
         $many = (new OrderLine(['tickets' => range(1, 75), 'paid_quantity' => 75]))->setRelation('competition', new Competition(['title' => 'Ninja Crispi', 'type' => 'draw']));
         $order = (new Order(['number' => 'GG-3003', 'order_type' => 'tickets', 'total_pence' => 1940, 'wallet_pence' => 440, 'card_pence' => 1500]))->setRelation('lines', collect([$bundle, $many]));
         [, $html] = $this->render(new OrderReceipt($order), $u);
-        $this->assertStringContainsString('28 tickets · 10 paid + 15 free + 3 Gimme Box bonus', $html);
+        $this->assertStringContainsString('28 tickets · 10 paid + 15 free + 3 Lucky Dip bonus', $html);
         $this->assertStringContainsString('and 15 more in My Tickets', $html);
         $this->assertStringContainsString('By card', $html);
         $this->assertStringContainsString('£19.40', $html);
@@ -167,7 +167,7 @@ class EmailsTest extends TestCase
     public function test_the_admin_test_email_shows_the_real_design(): void
     {
         [$m, $html] = $this->render(new \App\Notifications\TestEmail, new \Illuminate\Notifications\AnonymousNotifiable);
-        $this->assertSame('Gimme Gimme Test Email', $m->subject);
+        $this->assertSame('Easy Peasy Test Email', $m->subject);
         $this->assertStringContainsString('>#104</span>', $html);
         $this->assertStringContainsString('It isn’t a real order', $html);
         $this->assertBranded($html);
@@ -176,8 +176,8 @@ class EmailsTest extends TestCase
     public function test_the_admin_alert_uses_the_same_design(): void
     {
         [$m, $html] = $this->render(new AdminAlert('Order GG-9 needs attention', ['A paid order could not get all its tickets.'], '/admin/orders'), new \Illuminate\Notifications\AnonymousNotifiable);
-        $this->assertSame('[Gimme Gimme Admin] Order GG-9 needs attention', $m->subject);
-        $this->assertStringContainsString('#07050b', $html);
-        $this->assertStringContainsString('background-color: #fff23a', $html);
+        $this->assertSame('[Easy Peasy Admin] Order GG-9 needs attention', $m->subject);
+        $this->assertStringContainsStringIgnoringCase('#05060e', $html);
+        $this->assertStringContainsStringIgnoringCase('background-color: #ff1e8c', $html);
     }
 }

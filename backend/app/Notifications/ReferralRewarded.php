@@ -34,6 +34,6 @@ class ReferralRewarded extends Notification
             ->line($credit ? 'It’s in your wallet as bonus credit: spend only, it can’t be withdrawn.' : 'Choose any live draw to use them on. They’re entered exactly like paid tickets.')
             ->action($credit ? 'See Your Wallet' : 'Choose A Draw', $site.($credit ? '/account/wallet' : '/account/refer'))
             ->line('18+ UK only. Please play responsibly.')
-            ->salutation('The Gimme Gimme team');
+            ->salutation('The Easy Peasy team');
     }
 }

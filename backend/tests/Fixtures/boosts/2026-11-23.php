@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Prize boost of 23 Nov 2026 (owner, final list sent 09:53): extra instant prizes for the seven live instant-win
- * competitions, bringing each to 40% of sell-out (instant prizes plus end prizes), all site credit paid to winnings.
- * Tiers in the order their numbers are chosen (biggest first): [quantity, value in pence, name]. Names can be
- * changed here before the boost is added; once added, a prize never changes.
+ * Test fixture only (a copy of a real boost list from the build this site was based on). Easy Peasy lists go in
+ * resources/boosts/{date}.php. Tiers: [quantity, value in pence, name].
  */
 return [
     'reason' => 'Prize boost – 23 Nov 2026',

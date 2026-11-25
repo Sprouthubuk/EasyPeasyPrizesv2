@@ -34,7 +34,7 @@ const loopOf = <T,>(items: T[], min = 16): T[] => (items.length ? Array.from({ l
 const ladderLoop = loopOf(ladder);
 const winnersLoop = loopOf(winners, 8);
 ---
-<Layout title="Home" active="home" fullTitle="UK Prize Competitions & Instant Win Games | Gimme Gimme" description="Win cash, tech and more with UK online prize competitions from 1p: instant win games and live draws. 18+ UK only, free postal entry on every competition.">
+<Layout title="Home" active="home" fullTitle="UK Prize Competitions & Instant Win Games | Easy Peasy" description="Win cash, tech and more with UK online prize competitions from 1p: instant win games and live draws. 18+ UK only, free postal entry on every competition.">
   {featured && (
     <section class="sec" style="padding-top:20px"><div class="wrap split hero-split">
       <div class="stack g16 hero-txt">
@@ -84,7 +84,7 @@ const winnersLoop = loopOf(winners, 8);
   {site.gimmeBox && (
     <section id="gimme-box" class="sec"><div class="wrap stack g16">
       <div class="stack g8">
-        <h2 class="h2 gg-reveal sh">Gimme <span class="np">Box</span></h2>
+        <h2 class="h2 gg-reveal sh">Lucky <span class="np">Dip</span></h2>
         <p class="p" style="margin:0">Can't decide? Set a budget and we'll pack a mix of live draw tickets for you{site.gimmeBox.bonusPct > 0 ? <>, plus <b class="ny">{site.gimmeBox.bonusPct}% bonus tickets</b> free</> : null}.</p>
       </div>
       <GimmeBoxBuilder client:visible available={site.gimmeBox.available} chipsPence={site.gimmeBox.chipsPence} minPence={site.gimmeBox.minPence} maxPence={site.gimmeBox.maxPence} bonusPct={site.gimmeBox.bonusPct} />
@@ -101,7 +101,7 @@ const winnersLoop = loopOf(winners, 8);
   </div></section>
   <section class="sec"><div class="wrap stack g12" style="max-width:760px">
     <h2 class="h2 gg-reveal">Online Prize Competitions <span class="np">In The UK</span></h2>
-    <p class="p">Gimme Gimme Prizes runs online competitions for players in the UK aged 18 and over. Choose an <a href="/competitions?type=instant">instant win competition</a> and play a reveal game to see straight away whether your ticket has won, or enter a <a href="/competitions?type=draw">live draw</a> for a bigger prize, drawn when the competition closes.</p>
+    <p class="p">Easy Peasy Prizes runs online competitions for players in the UK aged 18 and over. Choose an <a href="/competitions?type=instant">instant win competition</a> and play a reveal game to see straight away whether your ticket has won, or enter a <a href="/competitions?type=draw">live draw</a> for a bigger prize, drawn when the competition closes.</p>
     <p class="p">Tickets start from 1p and every ticket number is given at random. Winning ticket numbers and entry lists are public, every winner is published on our <a href="/winners">winners page</a>, and every competition can be entered for free by post: see <a href="/free-entry">free postal entry</a> or read <a href="/how-it-works">how it works</a>.</p>
   </div></section>
 <script>

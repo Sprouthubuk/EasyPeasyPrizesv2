@@ -8,7 +8,7 @@ use Random\Engine\Secure;
 use Random\Randomizer;
 
 /**
- * Packs a Gimme Box: a budget spread over 2–4 competitions (live draws, and instant-win games an admin has
+ * Packs a Lucky Dip: a budget spread over 2–4 competitions (live draws, and instant-win games an admin has
  * switched on), priced only with the competition page's own bundle and single-ticket prices
  * (App\Services\Bundles), plus a stated percentage of free bonus tickets on the live draws only.
  * Instant-win lines are paid single tickets, never a bonus (owner, 22 Nov 2026), and every box holds at

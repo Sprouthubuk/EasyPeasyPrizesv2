@@ -97,7 +97,7 @@ final class CompetitionState
         $this->ignoredBoxes = array_values(array_filter($ids));
     }
 
-    /** Tickets held by Gimme Boxes still on show or in a basket (until they expire). */
+    /** Tickets held by Lucky Dips still on show or in a basket (until they expire). */
     public function boxHolds(Competition $c): int
     {
         $held = 0;

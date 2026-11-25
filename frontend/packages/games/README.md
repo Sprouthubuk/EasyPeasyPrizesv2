@@ -1,4 +1,4 @@
-# Gimme Gimme premium games
+# Easy Peasy premium games
 
 Nine instant-win reveal games built on one shell: PixiJS 8 for the scene, GSAP for motion, Howler for sound,
 TypeScript throughout. They live inside the front end and are installed with it (`frontend/package.json`).

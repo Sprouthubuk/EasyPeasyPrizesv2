@@ -13,14 +13,14 @@ use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 
 /**
- * How the Gimme Box is doing: boxes shaken, added and paid for, their average value, the bonus tickets
+ * How the Lucky Dip is doing: boxes shaken, added and paid for, their average value, the bonus tickets
  * given away, and per draw what share of its tickets came through boxes (flagged above the setting).
  */
 class GimmeBoxReport extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedGift;
 
-    protected static ?string $title = 'Gimme Box Report';
+    protected static ?string $title = 'Lucky Dip Report';
 
     protected static ?int $navigationSort = 5;
 

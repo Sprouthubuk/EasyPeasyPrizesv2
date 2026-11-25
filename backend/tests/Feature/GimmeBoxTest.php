@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
-/** The Gimme Box: packed and priced on the server, never over budget, holds its tickets for a while. */
+/** The Lucky Dip: packed and priced on the server, never over budget, holds its tickets for a while. */
 class GimmeBoxTest extends TestCase
 {
     protected function setUp(): void
