@@ -39,7 +39,7 @@ const canonical = canonicalUrl.toString();
 const origin = new URL(base).origin;
 const socials = Astro.locals.site?.socials;
 // Every page says who we are; pages add their own (breadcrumbs, FAQs).
-const ld = [organisationLd(origin, [socials?.instagram, socials?.facebook]), websiteLd(origin), ...jsonLd];
+const ld = [organisationLd(origin, [socials?.instagram, socials?.facebook, socials?.youtube, socials?.tiktok]), websiteLd(origin), ...jsonLd];
 const verification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
 ---
 <!doctype html>

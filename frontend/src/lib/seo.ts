@@ -57,8 +57,10 @@ export function organisationLd(site: string, social: (string | null | undefined)
     "@type": "Organization",
     "@id": `${site}/#organization`,
     name: BRAND,
+    legalName: "Easy Peasy Prizes Ltd",
     url: `${site}/`,
     logo: `${site}/logo.png`,
+    address: { "@type": "PostalAddress", streetAddress: "Clyde Offices 2nd Floor, 48 West George Street", addressLocality: "Glasgow", postalCode: "G2 1BP", addressCountry: "GB" },
     ...(social.filter(Boolean).length ? { sameAs: social.filter(Boolean) } : {}),
   };
 }
