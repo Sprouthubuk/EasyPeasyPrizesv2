@@ -12,7 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * The Gimme Box. The browser sends a budget and a mode and gets back a box the server packed and
+ * The Lucky Dip. The browser sends a budget and a mode and gets back a box the server packed and
  * priced: the player's own ticket counts, prices and % sold only (no ticket counts of any draw).
  */
 class GimmeBoxController extends Controller

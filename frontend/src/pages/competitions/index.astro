@@ -21,11 +21,11 @@ const TYPES: [string, string, (c: CompetitionSummary) => boolean][] = [
 const t = TYPES.find((x) => x[0] === type) ?? TYPES[0];
 // Each category is its own search result (canonical keeps ?type); a search or a re-sort is not.
 const SEO: Record<string, { title: string; h1: [string, string]; description: string }> = {
-  all: { title: "Live UK Competitions & Raffles | Gimme Gimme Prizes", h1: ["All", "Competitions"], description: "Every live Gimme Gimme competition: instant win games and live draw raffles for cash, tech and more, from 1p a ticket. 18+ UK, free postal entry." },
-  instant: { title: "Instant Win Competitions UK | Gimme Gimme Prizes", h1: ["Instant Win", "Competitions"], description: "Instant win competitions: buy a ticket, play the reveal game and see straight away if you've won cash or a prize. 18+ UK, free postal entry." },
-  draw: { title: "Live Draw Competitions & Raffles | Gimme Gimme Prizes", h1: ["Live Draw", "Competitions"], description: "Prize draws and raffles drawn live when they close. Pick your tickets, watch the draw and see every winner published. 18+ UK, free postal entry." },
-  under10: { title: "Competitions Under 10p | Gimme Gimme Prizes", h1: ["Under 10p", "Competitions"], description: "Cheap UK competitions with tickets under 10p: instant win games and live draws for cash and prizes. 18+ UK only, free postal entry." },
-  christmas: { title: "Christmas Competitions | Gimme Gimme Prizes", h1: ["Christmas", "Competitions"], description: "Christmas prize competitions: festive instant win games and live draws for cash and prizes. 18+ UK only, free postal entry on every one." },
+  all: { title: "Live UK Competitions & Raffles | Easy Peasy Prizes", h1: ["All", "Competitions"], description: "Every live Easy Peasy competition: instant win games and live draw raffles for cash, tech and more, from 1p a ticket. 18+ UK, free postal entry." },
+  instant: { title: "Instant Win Competitions UK | Easy Peasy Prizes", h1: ["Instant Win", "Competitions"], description: "Instant win competitions: buy a ticket, play the reveal game and see straight away if you've won cash or a prize. 18+ UK, free postal entry." },
+  draw: { title: "Live Draw Competitions & Raffles | Easy Peasy Prizes", h1: ["Live Draw", "Competitions"], description: "Prize draws and raffles drawn live when they close. Pick your tickets, watch the draw and see every winner published. 18+ UK, free postal entry." },
+  under10: { title: "Competitions Under 10p | Easy Peasy Prizes", h1: ["Under 10p", "Competitions"], description: "Cheap UK competitions with tickets under 10p: instant win games and live draws for cash and prizes. 18+ UK only, free postal entry." },
+  christmas: { title: "Christmas Competitions | Easy Peasy Prizes", h1: ["Christmas", "Competitions"], description: "Christmas prize competitions: festive instant win games and live draws for cash and prizes. 18+ UK only, free postal entry on every one." },
 };
 const seo = SEO[t[0]] ?? SEO.all;
 let list = all.filter(t[2]);

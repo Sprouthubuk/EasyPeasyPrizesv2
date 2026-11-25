@@ -1,6 +1,6 @@
-# Gimme Gimme Prizes — v2
+# Easy Peasy Prizes — v2
 
-UK prize competitions at gimmegimmeprizes.co.uk. Replaces the Lovable build (`Sprouthubuk/gimmegimmev1`).
+UK prize competitions at easypeasyprizes.com. Replaces the Lovable build (`Sprouthubuk/eppv1`).
 
 | Folder | What |
 | --- | --- |
@@ -44,17 +44,17 @@ Live draws can sell bundles of paid + free tickets. Free tickets are entered exa
   allowed bundle with Cashflows fees, profit and break-even) and warns when the worst case is a loss.
 - **Report:** Admin → Competitions → **Bundle Report** (average order, tickets per order, orders by bundle).
 
-## Gimme Box (lucky dip)
+## Lucky Dip (lucky dip)
 
 A player sets a budget (£5–£100) and a style (Surprise Me, Biggest Prizes, Most Tickets); the server packs
 2–4 live draws with the best bundles and singles the budget buys, at the competition page prices, never
 over budget, plus a % of bonus tickets (default 10%). The tickets are held 10 minutes. **Off by default.**
 
-- **Switch on / settings:** Admin → Settings → **Gimme Box** (budget buttons, limits, bonus %, hold, leave out
+- **Switch on / settings:** Admin → Settings → **Lucky Dip** (budget buttons, limits, bonus %, hold, leave out
   draws over x% sold, slow-seller boost, report warning level). It only shows when at least two live draws qualify.
-- **Per draw:** Admin → the competition → **Gimme Box**: in or out, and how often it's picked (weight).
+- **Per draw:** Admin → the competition → **Lucky Dip**: in or out, and how often it's picked (weight).
   The margin preview shows bonus tickets issued so far and the worst case with the bonus.
-- **Report:** Admin → Competitions → **Gimme Box Report**.
+- **Report:** Admin → Competitions → **Lucky Dip Report**.
 
 ## Refer a Friend
 
@@ -67,8 +67,6 @@ address / email pattern; many friends from one IP or device go to a review queue
   reviewed, and edit them in Admin → Pages (`referral-terms`).
 - **Switch on / settings:** Admin → Settings → **Refer A Friend**.
 - **Review queue and report:** Admin → Marketing → **Referrals** (approve / reject with a reason).
-- **Launch draws:** `php artisan gimme:launch-drafts` creates the five launch draws as drafts with
-  their bundles; add pictures, prize values, dates and descriptions, then publish.
 
 ## Tests
 

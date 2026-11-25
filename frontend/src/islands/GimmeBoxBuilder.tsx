@@ -18,7 +18,7 @@ const reducedMotion = () => typeof window !== "undefined" && window.matchMedia?.
 /*
  * The box, drawn in 2D (SVG). Points on the cube are projected isometrically; each face is drawn in a
  * 100×100 square and mapped onto the cube with a matrix, so the logo, ribbon and confetti lean with it.
- * Body: dark with brand confetti, the Gimme Gimme logo and a neon question mark. Lid: brand pink with a
+ * Body: dark with brand confetti, the Easy Peasy logo and a neon question mark. Lid: brand pink with a
  * yellow ribbon (one band, front-left to back-right, so it never crosses the logo) and a bow.
  */
 type Pt = [number, number];
@@ -36,7 +36,7 @@ const lidL = faceMatrix(P(-O, 1 + O, TOP), P(1 + O, 1 + O, TOP), P(-O, 1 + O, TO
 const lidR = faceMatrix(P(1 + O, 1 + O, TOP), P(1 + O, -O, TOP), P(1 + O, 1 + O, TOP - LID));
 const lidT = faceMatrix(P(-O, -O, TOP), P(1 + O, -O, TOP), P(-O, 1 + O, TOP));
 const [bowX, bowY] = P(0.5, 0.5, TOP);
-const CONFETTI: [number, number, string, number][] = [[8, 14, "#22E6FF", 20], [22, 82, "#FFF23A", -30], [84, 12, "#FF5CC0", 40], [90, 70, "#22E6FF", -15], [50, 90, "#FF5CC0", 10], [12, 50, "#FF5CC0", 60], [70, 88, "#FFF23A", 25]];
+const CONFETTI: [number, number, string, number][] = [[8, 14, "#3FD8FF", 20], [22, 82, "#00D2F5", -30], [84, 12, "#FF6FD0", 40], [90, 70, "#3FD8FF", -15], [50, 90, "#FF6FD0", 10], [12, 50, "#FF6FD0", 60], [70, 88, "#00D2F5", 25]];
 const EDGE = { stroke: "rgba(255,255,255,.6)", strokeWidth: 1.2, vectorEffect: "non-scaling-stroke" as const };
 
 function BoxArt({ shaking }: { shaking: boolean }) {
@@ -45,9 +45,9 @@ function BoxArt({ shaking }: { shaking: boolean }) {
       <defs>
         <linearGradient id="gbxBodyL" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#24182F" /><stop offset="1" stopColor="#140D1B" /></linearGradient>
         <linearGradient id="gbxBodyR" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#170F1F" /><stop offset="1" stopColor="#0B0710" /></linearGradient>
-        <linearGradient id="gbxLid" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stopColor="#FF5CC0" /><stop offset="1" stopColor="#FF2DAA" /></linearGradient>
+        <linearGradient id="gbxLid" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stopColor="#FF6FD0" /><stop offset="1" stopColor="#FF1E8C" /></linearGradient>
       </defs>
-      <ellipse cx="150" cy="282" rx="112" ry="10" fill="#FF2DAA" opacity=".22" />
+      <ellipse cx="150" cy="282" rx="112" ry="10" fill="#FF1E8C" opacity=".22" />
 
       <g transform={bodyL}>
         <rect width="100" height="100" fill="url(#gbxBodyL)" {...EDGE} />
@@ -57,9 +57,9 @@ function BoxArt({ shaking }: { shaking: boolean }) {
       <g transform={bodyR}>
         <rect width="100" height="100" fill="url(#gbxBodyR)" {...EDGE} />
         {CONFETTI.map(([x, y, c, r], i) => <rect key={i} x={100 - x} y={y} width="5" height="2.6" rx="1" fill={c} transform={`rotate(${-r} ${100 - x} ${y})`} opacity=".7" />)}
-        <rect x="43" width="14" height="100" fill="#FFF23A" />
+        <rect x="43" width="14" height="100" fill="#00D2F5" />
         <rect x="43" width="2" height="100" fill="#B38F00" opacity=".5" />
-        <text x="78" y="66" textAnchor="middle" fontFamily="'Lilita One',sans-serif" fontSize="52" fill="#22E6FF" style={{ filter: "drop-shadow(0 0 4px rgba(34,230,255,.8))" }}>?</text>
+        <text x="78" y="66" textAnchor="middle" fontFamily="Sora,sans-serif" fontSize="52" fill="#3FD8FF" style={{ filter: "drop-shadow(0 0 4px rgba(63,216,255,.8))" }}>?</text>
       </g>
 
       <g className="gbx-lid">
@@ -68,15 +68,15 @@ function BoxArt({ shaking }: { shaking: boolean }) {
         </g>
         <g transform={lidR}>
           <rect width="100" height="100" fill="#B0006A" {...EDGE} />
-          <rect x="44" width="12" height="100" fill="#FFF23A" />
+          <rect x="44" width="12" height="100" fill="#00D2F5" />
         </g>
         <g transform={lidT}>
           <rect width="100" height="100" fill="url(#gbxLid)" {...EDGE} />
-          <rect y="44" width="100" height="12" fill="#FFF23A" />
+          <rect y="44" width="100" height="12" fill="#00D2F5" />
         </g>
         <g transform={`translate(${bowX} ${bowY})`}>
-          <path d="M0 0C-14-22-46-24-44-8-42 4-16 4 0 0Z" fill="#FFF23A" stroke="#B38F00" strokeWidth="1.5" />
-          <path d="M0 0C14-22 46-24 44-8 42 4 16 4 0 0Z" fill="#FFF23A" stroke="#B38F00" strokeWidth="1.5" />
+          <path d="M0 0C-14-22-46-24-44-8-42 4-16 4 0 0Z" fill="#00D2F5" stroke="#B38F00" strokeWidth="1.5" />
+          <path d="M0 0C14-22 46-24 44-8 42 4 16 4 0 0Z" fill="#00D2F5" stroke="#B38F00" strokeWidth="1.5" />
           <path d="M-4 2-14 22-6 20-2 26ZM4 2 14 22 6 20 2 26Z" fill="#FFE600" stroke="#B38F00" strokeWidth="1.2" />
           <ellipse cx="0" cy="0" rx="8" ry="6" fill="#FFE600" stroke="#B38F00" strokeWidth="1.5" />
         </g>
@@ -194,12 +194,12 @@ export default function GimmeBoxBuilder({ chipsPence, minPence, maxPence, bonusP
                 <div className="gbx-line-txt">
                   <a href={`/competitions/${l.slug}`}>{l.title}</a>
                   <span className="hint">{l.type === "instant" ? "Instant Win · " : ""}{l.tickets.toLocaleString("en-GB")} tickets{l.bundleLabel ? ` · ${l.bundleLabel}` : ""}{l.bonusQuantity > 0 ? ` · +${l.bonusQuantity} bonus` : ""} · {l.soldPercent}% sold</span>
-                  {l.notice && <span className="hint" style={{ color: "#FFF23A" }}>{l.notice}</span>}
+                  {l.notice && <span className="hint" style={{ color: "#00D2F5" }}>{l.notice}</span>}
                 </div>
                 <b>{formatMoney(l.linePence)}</b>
               </div>
             ))}
-            {box.bonusTickets > 0 && <p className="hint" style={{ margin: 0, color: "#22E6FF" }}>Includes {box.bonusTickets} bonus {box.bonusTickets === 1 ? "ticket" : "tickets"}, free.</p>}
+            {box.bonusTickets > 0 && <p className="hint" style={{ margin: 0, color: "#3FD8FF" }}>Includes {box.bonusTickets} bonus {box.bonusTickets === 1 ? "ticket" : "tickets"}, free.</p>}
             {box.unusedPence > 0 && <p className="hint" style={{ margin: 0 }} data-testid="gb-unused">{formatMoney(box.unusedPence)} of your {formatPence(box.budgetPence)} wasn't enough for another ticket, so you only pay {formatMoney(box.totalPence)}.</p>}
             <div className="row between" style={{ alignItems: "baseline", borderTop: "1px solid rgba(255,255,255,.09)", paddingTop: 12 }}>
               <span className="lbl">Total</span>

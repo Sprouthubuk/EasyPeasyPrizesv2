@@ -23,7 +23,7 @@ class LaunchContentTest extends TestCase
             $this->getJson("/api/pages/{$slug}")->assertOk()->assertJsonPath('title', $page->title);
         }
         $terms = Page::query()->findOrFail('terms')->html;
-        $this->assertStringContainsString('17496537', $terms);
+        $this->assertStringContainsString('SC747746', $terms);
         $this->assertStringContainsString('<h2 id="1-who-we-are">1. Who We Are</h2>', $terms);
         // Version 2.0 (18 Nov 2026): none of the old template wording, nothing the site doesn't do.
         $all = strtolower(Page::query()->pluck('html')->implode(' '));
@@ -32,7 +32,7 @@ class LaunchContentTest extends TestCase
         }
         $this->assertStringContainsString('ico.org.uk', Page::query()->findOrFail('privacy')->html);
         $this->assertSame('2.1', Page::query()->findOrFail('terms')->version);
-        $this->assertStringContainsString('57 Oakhanger Drive', Page::query()->findOrFail('free-entry')->html);
+        $this->assertStringContainsString('Clyde Offices 2nd Floor<br>48 West George Street', Page::query()->findOrFail('free-entry')->html);
     }
 
     public function test_wording_edited_in_the_admin_is_kept_unless_forced(): void
@@ -47,7 +47,7 @@ class LaunchContentTest extends TestCase
         $this->assertStringNotContainsString('Sample', Page::query()->findOrFail('privacy')->html);
 
         $this->artisan('gimme:legal-pages', ['--force' => true])->assertSuccessful();
-        $this->assertStringContainsString('17496537', Page::query()->findOrFail('terms')->html);
+        $this->assertStringContainsString('SC747746', Page::query()->findOrFail('terms')->html);
     }
 
     public function test_db_seed_makes_no_accounts(): void

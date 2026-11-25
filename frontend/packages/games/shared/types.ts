@@ -49,7 +49,7 @@ export interface GameConfig {
   reducedMotion?: boolean;
   /**
    * Tells the server the player has watched their results. Called at most once per session, when the
-   * first ticket is revealed; must be safe to repeat (the Gimme Gimme endpoint is).
+   * first ticket is revealed; must be safe to repeat (the Easy Peasy endpoint is).
    */
   onReveal?: () => Promise<unknown>;
   /** Called when the session ends (summary shown). */

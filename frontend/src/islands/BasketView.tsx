@@ -125,7 +125,7 @@ export default function BasketView({ signedIn, gimmeBox = false }: { signedIn: b
           {error && <div className="notice notice-p" role="alert"><Svg name="info" size={18} /><span>{error}</span></div>}
           <a className="btn btn-y btn-lg btn-block gg-cta" href={checkoutHref} aria-disabled={!priced || priced.problems.length > 0 || priced.lines.some((l) => l.problem) ? "true" : undefined}>Checkout · {priced ? formatMoney(priced.totalPence) : "…"}</a>
           <a className="btn btn-o btn-block" href="/competitions">Keep Browsing</a>
-          {gimmeBox && lines.every((l) => !l.boxId) && <a className="tap" style={{ textAlign: "center", fontWeight: 800 }} href="/gimme-box">Or let a Gimme Box pick for you</a>}
+          {gimmeBox && lines.every((l) => !l.boxId) && <a className="tap" style={{ textAlign: "center", fontWeight: 800 }} href="/gimme-box">Or let a Lucky Dip pick for you</a>}
         </div>
       </div>
     </div>

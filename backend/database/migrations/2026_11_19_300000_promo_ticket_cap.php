@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Per-draw cap on promotional free tickets (referral vouchers + Gimme Box bonus tickets), as a % of the
+ * Per-draw cap on promotional free tickets (referral vouchers + Lucky Dip bonus tickets), as a % of the
  * draw's tickets. Postal entries are not promotional and are never counted.
  */
 return new class extends Migration

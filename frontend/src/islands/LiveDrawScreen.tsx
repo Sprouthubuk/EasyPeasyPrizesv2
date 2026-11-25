@@ -135,7 +135,7 @@ export default function LiveDrawScreen({ initial, slug }: { initial: LiveDraw; s
   return (
     <div className={`ld ${stage === "landed" ? "ld-won" : ""}`} data-testid="live-draw" data-phase={data.phase} data-stage={stage}>
       <header className="ld-top">
-        <img src="/logo-sm.webp" alt="Gimme Gimme Prizes" width="96" height="64" className="ld-logo" />
+        <img src="/logo-sm.webp" alt="Easy Peasy Prizes" width="96" height="64" className="ld-logo" />
         <span className="ld-live"><i /> Live Draw</span>
         <button type="button" className="ld-full" onClick={toggleFull} aria-label="Full screen">⛶</button>
       </header>

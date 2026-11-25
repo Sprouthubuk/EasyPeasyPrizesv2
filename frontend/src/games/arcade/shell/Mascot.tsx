@@ -4,7 +4,7 @@ import { useSkin } from "../skins/SkinContext";
 export type MascotMood = "happy" | "wink" | "smile";
 
 /**
- * The Gimme Gimme smiley. Under a skin with a hat (Christmas: a Santa hat) it wears it
+ * The Easy Peasy smiley. Under a skin with a hat (Christmas: a Santa hat) it wears it
  * everywhere it appears; `hat` overrides that.
  */
 export function Mascot({ mood = "smile", className = "", hat }: { mood?: MascotMood; className?: string; hat?: "santa" | "none" }) {

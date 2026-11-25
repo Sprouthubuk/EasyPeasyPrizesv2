@@ -24,6 +24,12 @@ use Tests\TestCase;
 /** Prize boosts (owner, 23 Nov 2026): extra instant prizes added by Verity itself (spec §17), never touching what's there. */
 class PrizeBoostTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['prize_boosts.path' => base_path('tests/Fixtures/boosts')]);
+    }
+
     private const REASON = 'Prize boost – 23 Nov 2026';
 
     private function buy(User $u, Competition $c, int $qty)
@@ -79,11 +85,11 @@ class PrizeBoostTest extends TestCase
         $original = DB::table('verity_instant_tickets')->where('competition_id', $v->id)->orderBy('id')->get()->map(fn ($r) => (array) $r)->all();
         $hash = DrawReverify::storedTableHash($v);
 
-        $this->artisan('competitions:boost-prizes', ['--dry-run' => true, '--only' => 'smash-my-cash'])->expectsOutputToContain('DRY RUN')
+        $this->artisan('competitions:boost-prizes', ['--batch' => '2026-11-23', '--dry-run' => true, '--only' => 'smash-my-cash'])->expectsOutputToContain('DRY RUN')
             ->expectsOutputToContain('Adding: 891 worth £1,850.00')->expectsOutputToContain('Ready to add.')->assertSuccessful();
         $this->assertSame(0, InstantAddition::query()->count(), 'a dry run changes nothing');
 
-        $this->artisan('competitions:boost-prizes', ['--only' => 'smash-my-cash'])->expectsOutputToContain('ADDED by Verity: addition 1')->assertSuccessful();
+        $this->artisan('competitions:boost-prizes', ['--batch' => '2026-11-23', '--only' => 'smash-my-cash'])->expectsOutputToContain('ADDED by Verity: addition 1')->assertSuccessful();
         $a = InstantAddition::query()->firstOrFail();
         $this->assertSame(['sealed', self::REASON], [$a->status, $a->reason]);
         $added = DB::table('verity_instant_tickets')->where('addition_id', $a->id)->pluck('ticket_number')->map(fn ($n) => (int) $n)->all();
@@ -96,9 +102,9 @@ class PrizeBoostTest extends TestCase
         $this->assertTrue(AuditEvent::query()->where('type', 'instant.prizes_added')->exists());
         $this->assertSame('site_credit', DB::table('verity_instant_prizes')->where('addition_id', $a->id)->value('meta') ? json_decode(DB::table('verity_instant_prizes')->where('addition_id', $a->id)->value('meta'), true)['type'] : null);
 
-        $this->artisan('competitions:boost-prizes', ['--only' => 'smash-my-cash'])->expectsOutputToContain('SKIP: already added')->assertSuccessful();
+        $this->artisan('competitions:boost-prizes', ['--batch' => '2026-11-23', '--only' => 'smash-my-cash'])->expectsOutputToContain('SKIP: already added')->assertSuccessful();
         $this->assertSame(1, InstantAddition::query()->count());
-        $this->artisan('competitions:boost-prizes', ['--verify' => true, '--only' => 'smash-my-cash'])
+        $this->artisan('competitions:boost-prizes', ['--batch' => '2026-11-23', '--verify' => true, '--only' => 'smash-my-cash'])
             ->expectsOutputToContain('OK   smash-my-cash: added numbers re-derive yes · original prizes and numbers unchanged yes · sold before being added 0')->assertSuccessful();
     }
 
@@ -179,7 +185,7 @@ class PrizeBoostTest extends TestCase
     {
         Storage::fake('local');
         $this->game(['max_tickets' => 5000, 'max_per_person' => 5000]);
-        $this->artisan('competitions:boost-prizes', ['--only' => 'smash-my-cash'])->assertSuccessful();
+        $this->artisan('competitions:boost-prizes', ['--batch' => '2026-11-23', '--only' => 'smash-my-cash'])->assertSuccessful();
         $admin = $this->admin();
         $admin->saveAppAuthenticationSecret(app(AppAuthentication::class)->generateSecret());
         $this->actingAs($admin->refresh(), 'web');

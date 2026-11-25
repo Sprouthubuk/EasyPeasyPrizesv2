@@ -5,7 +5,7 @@ import type { GameTicket, PrizeTier } from "./types";
  * (a RaffleLabs client) only needs its own adapter. Order and outcomes are taken exactly as given.
  */
 
-/** Gimme Gimme's `POST /api/orders/{number}/play` response (see docs/api.md). */
+/** Easy Peasy's `POST /api/orders/{number}/play` response (see docs/api.md). */
 export interface RevealOutcomeLike {
   outcome: {
     tickets: readonly {

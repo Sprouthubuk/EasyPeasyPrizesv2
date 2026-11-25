@@ -1,7 +1,7 @@
 # Premium Games: Plan
 
 A reusable library of premium instant-win reveal games (PixiJS v8, GSAP, Howler, TypeScript), first used on
-Gimme Gimme Prizes and later on RaffleLabs client sites. First game: the premium Scratch Card.
+Easy Peasy Prizes and later on RaffleLabs client sites. First game: the premium Scratch Card.
 
 ## Where it lives
 

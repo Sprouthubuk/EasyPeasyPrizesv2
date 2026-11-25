@@ -15,7 +15,7 @@ use Filament\Facades\Filament;
 use Livewire\Livewire;
 use Tests\TestCase;
 
-/** The admin side of Gimme Box and Refer a Friend: switches, settings, reports and the review queue. */
+/** The admin side of Lucky Dip and Refer a Friend: switches, settings, reports and the review queue. */
 class GimmeAdminTest extends TestCase
 {
     private function signInAdmin(): void
@@ -58,7 +58,7 @@ class GimmeAdminTest extends TestCase
     public function test_the_reports_open(): void
     {
         $this->signInAdmin();
-        Livewire::test(GimmeBoxReport::class)->assertOk()->assertSeeHtml('<b>OFF</b>')->assertSee('No paid Gimme Box tickets yet');
+        Livewire::test(GimmeBoxReport::class)->assertOk()->assertSeeHtml('<b>OFF</b>')->assertSee('No paid Lucky Dip tickets yet');
         Livewire::test(ListReferrals::class)->assertOk()->assertSee('Refer a Friend is OFF');
     }
 

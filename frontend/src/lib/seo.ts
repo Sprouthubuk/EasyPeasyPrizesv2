@@ -10,7 +10,7 @@ import { formatPence } from "./money";
 import { ukDate } from "./time";
 import type { CompetitionDetail } from "./types";
 
-export const BRAND = "Gimme Gimme Prizes";
+export const BRAND = "Easy Peasy Prizes";
 
 export const TITLE_MAX = 60;
 export const DESCRIPTION_MAX = 155;
@@ -24,11 +24,11 @@ export function clamp(text: string, max: number): string {
   return `${(at > max * 0.6 ? cut.slice(0, at) : cut).replace(/[\s,.;:–-]+$/, "")}…`;
 }
 
-/** "Title | Gimme Gimme Prizes", dropping the brand (then shortening) rather than going over. */
+/** "Title | Easy Peasy Prizes", dropping the brand (then shortening) rather than going over. */
 export function pageTitle(title: string): string {
   const withBrand = `${title} | ${BRAND}`;
   if (withBrand.length <= TITLE_MAX) return withBrand;
-  const short = `${title} | Gimme Gimme`;
+  const short = `${title} | Easy Peasy`;
   return short.length <= TITLE_MAX ? short : clamp(title, TITLE_MAX);
 }
 
@@ -69,7 +69,7 @@ export function websiteLd(site: string): Json {
     "@type": "WebSite",
     "@id": `${site}/#website`,
     name: BRAND,
-    alternateName: "Gimme Gimme",
+    alternateName: "Easy Peasy",
     url: `${site}/`,
     inLanguage: "en-GB",
     publisher: { "@id": `${site}/#organization` },

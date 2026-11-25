@@ -183,7 +183,7 @@ export default function TicketPicker(p: PickerProps) {
                 value={typed ?? (choice.kind === "bundle" ? "" : String(qty || min))} placeholder="Type a number" disabled={!!blocked}
                 onChange={(e) => { setTyped(e.target.value); const n = Number(e.target.value); if (Number.isFinite(n) && n >= min) { setChoice({ kind: "single", qty: clamp(n) }); setAdded(null); } }}
                 onBlur={() => setTyped(null)}
-                style={{ flex: 1, fontFamily: "'Lilita One',sans-serif", fontSize: 22, textAlign: "center" }}
+                style={{ flex: 1, fontFamily: "Sora,sans-serif", fontSize: 22, textAlign: "center" }}
               />
               <span className="muted" style={{ fontWeight: 800 }}>tickets</span>
             </div>
@@ -218,7 +218,7 @@ export default function TicketPicker(p: PickerProps) {
 
       {bundles.length > 0 && <p className="hint" style={{ margin: 0 }}>Bundle and free tickets are entered into the draw exactly like paid tickets.</p>}
       {blocked && <div className="notice notice-p" role="status"><Svg name="info" size={18} /><span>{blocked}</span></div>}
-      {added && <div className="notice notice-c gg-pop" role="status"><Svg name="check" size={18} stroke={2.6} /><span>Added {added} to your basket. <a href="/basket" style={{ color: "#22E6FF" }}>View basket</a> or keep browsing.</span></div>}
+      {added && <div className="notice notice-c gg-pop" role="status"><Svg name="check" size={18} stroke={2.6} /><span>Added {added} to your basket. <a href="/basket" style={{ color: "#3FD8FF" }}>View basket</a> or keep browsing.</span></div>}
 
       {!blocked && (
         <div className={`buybar${actionsOnScreen ? " buybar-away" : ""}`} data-testid="buy-bar" aria-hidden={actionsOnScreen || undefined}>

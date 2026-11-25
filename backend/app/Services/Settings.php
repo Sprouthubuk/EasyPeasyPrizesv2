@@ -54,7 +54,7 @@ final class Settings
         return max($min, min($max, Setting::int($key)));
     }
 
-    /** @return list<int> the Gimme Box budget chips in pence, within the slider's range */
+    /** @return list<int> the Lucky Dip budget chips in pence, within the slider's range */
     public static function gimmeBoxChips(): array
     {
         [$lo, $hi] = [self::bounded('gimme_box_min_pence', 100, 100000), self::bounded('gimme_box_max_pence', 100, 100000)];

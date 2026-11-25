@@ -1,4 +1,4 @@
-# Gimme Gimme API contract
+# Easy Peasy API contract
 
 The Astro front end (`frontend/`) talks to the Laravel backend (`backend/`) only through the
 endpoints below. The TypeScript shapes are the source of truth: `frontend/src/lib/types.ts`.
@@ -139,7 +139,7 @@ Return addresses given to Cashflows: success `/order/{n}` (deposits: `/account/w
 which calls `/return` server-side), failed `/payment/failed?order={n}`, cancelled
 `/payment/cancelled?order={n}`.
 
-## Gimme Box (lucky dip, live draws only)
+## Lucky Dip (lucky dip, live draws only)
 
 Off unless an admin switches it on (`site.gimmeBox` is then `{ available, chipsPence, minPence, maxPence, bonusPct }`;
 `available` is false when fewer than two draws can go in a box). While off every route below is `404`.
@@ -162,7 +162,7 @@ isn't released or paid, the server adds the box's bonus: the `PricedLine` then h
 (inside `quantity`), `source: "gimme_box"` and `gimmeBoxId`. Order lines record the same.
 
 **Promo ticket cap.** Each draw has `promo_ticket_cap_pct` (admin, default 5%): referral voucher tickets
-and Gimme Box bonus tickets together never pass that share of its tickets (paid orders and unpaid ones
+and Lucky Dip bonus tickets together never pass that share of its tickets (paid orders and unpaid ones
 still in their hold are counted; postal entries and bundle free tickets never are). Once reached, a box
 line and a `PricedLine` carry `bonusQuantity: 0` and `notice: "Bonus tickets for this draw have all been
 given out."` (paid tickets still sell), and the voucher draw picker leaves the draw out. No response

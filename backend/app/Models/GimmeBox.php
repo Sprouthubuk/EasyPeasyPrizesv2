@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-/** A packed Gimme Box. Its lines hold tickets for a few minutes (HOLDING) so the price shown is honoured. */
+/** A packed Lucky Dip. Its lines hold tickets for a few minutes (HOLDING) so the price shown is honoured. */
 class GimmeBox extends Model
 {
     public $incrementing = false;

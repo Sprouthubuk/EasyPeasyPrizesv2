@@ -19,7 +19,7 @@ interface Props {
   noindex?: boolean;
   /** The picture shown when the page is shared (Facebook, WhatsApp); the logo when not given. */
   shareImage?: string | null;
-  /** Use this whole title in search results instead of "Title | Gimme Gimme Prizes". */
+  /** Use this whole title in search results instead of "Title | Easy Peasy Prizes". */
   fullTitle?: string;
   /** Query keys that make a different page worth its own search result (e.g. ["type"] on /competitions). */
   canonicalKeys?: string[];
@@ -50,12 +50,12 @@ const verification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
   <title>{full}</title>
   <meta name="description" content={description}>
   <meta name="robots" content={robots}>
-  <meta name="theme-color" content="#07050B">
+  <meta name="theme-color" content="#05060E">
   <link rel="canonical" href={canonical}>
   <link rel="icon" href="/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <link rel="preload" href="/fonts/lilita-one-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/sora-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
   {verification && <meta name="google-site-verification" content={verification}>}
   <meta property="og:site_name" content={BRAND}>
   <meta property="og:locale" content="en_GB">

@@ -115,7 +115,7 @@ class AdminTest extends TestCase
 
     public function test_the_gimme_box_switch_starts_off_for_an_instant_win_and_on_for_a_draw(): void
     {
-        // Owner, 22 Nov 2026: instant-win games can go in a Gimme Box once an admin switches them on.
+        // Owner, 22 Nov 2026: instant-win games can go in a Lucky Dip once an admin switches them on.
         $this->signInAdmin();
         Livewire::test(CreateCompetition::class)->fillForm(['type' => 'instant'])->assertFormSet(['gimme_box_enabled' => false])->assertFormFieldExists('gimme_box_weight')
             ->fillForm(['type' => 'draw'])->assertFormSet(['gimme_box_enabled' => true]);
@@ -181,7 +181,7 @@ class AdminTest extends TestCase
         foreach (['ui-avatars.com', 'fonts.bunny.net', 'fonts.googleapis.com'] as $host) {
             $this->assertStringNotContainsString($host, $html, "the admin must not load anything from {$host}");
         }
-        foreach (['admin.css', 'fonts.css', 'logo.webp', 'favicon.png', 'nunito-latin.woff2', 'lilita-one-latin.woff2'] as $f) {
+        foreach (['admin.css', 'fonts.css', 'logo.webp', 'favicon.png', 'manrope-latin.woff2', 'sora-latin.woff2'] as $f) {
             $this->assertFileExists(public_path('css/filament/gimme/'.$f));
         }
         Filament::setCurrentPanel('admin');

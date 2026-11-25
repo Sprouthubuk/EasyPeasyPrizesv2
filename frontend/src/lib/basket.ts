@@ -42,7 +42,7 @@ const isBundle = (l: BasketLine) => !!l.bundleId;
 export function addToBasket(competitionId: string, quantity: number, replace = false): BasketLine[] {
   const lines = readBasket();
   const i = lines.findIndex((l) => l.competitionId === competitionId && !isBundle(l));
-  // A Gimme Box line keeps its box: the server still adds the bonus while the line holds at least what the box packed.
+  // A Lucky Dip line keeps its box: the server still adds the bonus while the line holds at least what the box packed.
   if (i >= 0) lines[i] = { ...lines[i], competitionId, quantity: replace ? quantity : lines[i].quantity + quantity };
   else lines.push({ competitionId, quantity });
   const next = lines.filter((l) => isBundle(l) || l.quantity > 0);
@@ -67,7 +67,7 @@ export function upgradeLine(competitionId: string, fromBundleId: number | null, 
 }
 
 /**
- * Put a Gimme Box in the basket. Each box line takes the place of the same kind of line (bundle or
+ * Put a Lucky Dip in the basket. Each box line takes the place of the same kind of line (bundle or
  * single tickets) for that draw, so the basket never prices one draw twice.
  */
 export function addBoxLines(box: { competitionId: string; quantity: number; bundleId?: number; boxId: string }[]): BasketLine[] {

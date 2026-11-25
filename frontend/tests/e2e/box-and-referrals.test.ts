@@ -8,13 +8,13 @@ afterAll(async () => { await site?.stop(); });
 const uniq = () => `p${Date.now()}${Math.floor(Math.random() * 1e6)}@example.com`;
 const COUNT_KEYS = ["maxTickets", "ticketsSold", "ticketsLeft", "remaining", "maxPerPerson", "maxEntries"];
 
-describe("Gimme Box", () => {
+describe("Lucky Dip", () => {
   it("the home page, the box page and draw pages show it while it's on", async () => {
     const b = new Browser(site.origin);
     expect((await b.page("/")).html).toContain('data-testid="gimme-box"');
     const page = await b.page("/gimme-box");
     expect(page.res.status).toBe(200);
-    expect(text(page.html)).toContain("Gimme Box");
+    expect(text(page.html)).toContain("Lucky Dip");
     expect((await b.page("/competitions/ninja-possiblecooker")).html).toContain('data-testid="gb-link"');
     // Not on instant wins: boxes are live draws only.
     expect((await b.page("/competitions/fruity-fortunes")).html).not.toContain('data-testid="gb-link"');

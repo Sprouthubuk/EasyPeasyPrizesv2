@@ -30,11 +30,11 @@ class OrderReceipt extends Notification
         if ($o->isDeposit()) {
             return (new MailMessage)->subject('Top Up Received · '.$o->number)
                 ->greeting('Thanks, '.$notifiable->first_name.'!')
-                ->line('Your top up is in your Gimme Gimme wallet, ready to play.')
+                ->line('Your top up is in your Easy Peasy wallet, ready to play.')
                 ->markdown('notifications::email', ['blocks' => [['rows', [['Order', $o->number]], 'Added', $money($o->total_pence)]]])
                 ->action('See Your Wallet', $site.'/account/wallet')
                 ->line('18+ UK only. Please play responsibly.')
-                ->salutation('The Gimme Gimme team');
+                ->salutation('The Easy Peasy team');
         }
 
         $blocks = [];
@@ -55,7 +55,7 @@ class OrderReceipt extends Notification
                     $parts[] = ((int) $l->free_quantity).' free';
                 }
                 if ($l->bonus_quantity > 0) {
-                    $parts[] = ((int) $l->bonus_quantity).' Gimme Box bonus';
+                    $parts[] = ((int) $l->bonus_quantity).' Lucky Dip bonus';
                 }
             }
             $sub = number_format($n).' '.($n === 1 ? 'ticket' : 'tickets').($parts ? ' · '.implode(' + ', $parts) : '');
@@ -77,6 +77,6 @@ class OrderReceipt extends Notification
             ->markdown('notifications::email', ['blocks' => $blocks])
             ->action($instant ? 'Play Your Games' : 'See Your Order', $site.'/order/'.$o->number)
             ->line('Your tickets are also in My Tickets. 18+ UK only. Please play responsibly.')
-            ->salutation('The Gimme Gimme team');
+            ->salutation('The Easy Peasy team');
     }
 }

@@ -514,7 +514,7 @@ html.rg-lock, html.rg-lock body { overflow: hidden; overscroll-behavior: none; }
 .rg-btn-cyan, .rg-btn-white { min-height: 48px; }
 .rg-link { min-height: 44px; display: inline-flex; align-items: center; }
 
-/* ---------- Gimme Gimme brand: logo in the header and the splash burst ---------- */
+/* ---------- Easy Peasy brand: logo in the header and the splash burst ---------- */
 .rg-brand-logo {
   display: block;
   height: 32px;

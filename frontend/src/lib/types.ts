@@ -121,7 +121,7 @@ export interface SiteInfo {
   supportEmail: string | null;
   /** Meta Pixel ID from the admin; null when none is set (then nothing from Meta ever loads). */
   metaPixelId: string | null;
-  /** Gimme Box (lucky dip): null while the feature is off. `available` is false when fewer than two draws can go in. */
+  /** Lucky Dip (lucky dip): null while the feature is off. `available` is false when fewer than two draws can go in. */
   gimmeBox: { available: boolean; chipsPence: Pence[]; minPence: Pence; maxPence: Pence; bonusPct: number } | null;
   /** Refer a Friend: null while the feature is off. */
   referrals: { rewardType: "tickets" | "credit"; rewardTickets: number; rewardCreditPence: Pence; minPurchasePence: Pence } | null;
@@ -200,7 +200,7 @@ export interface BasketLine {
   quantity: number;
   /** A "Buy X Get Y Free" bundle (live draws). The server works out its price and tickets. */
   bundleId?: number | null;
-  /** Set when the line came from a Gimme Box: the server adds the box's bonus tickets while the line still matches it. */
+  /** Set when the line came from a Lucky Dip: the server adds the box's bonus tickets while the line still matches it. */
   boxId?: string | null;
 }
 
@@ -284,12 +284,12 @@ export interface PricedLine {
   unitPence: Pence;
   linePence: Pence;
   minQuantity: number;
-  /** Extra tickets from a Gimme Box, already inside `quantity`. */
+  /** Extra tickets from a Lucky Dip, already inside `quantity`. */
   bonusQuantity: number;
   source: "gimme_box" | null;
   gimmeBoxId: string | null;
   problem: string | null;
-  /** Neutral note that doesn't stop checkout, e.g. a Gimme Box bonus the draw's promo cap no longer allows. */
+  /** Neutral note that doesn't stop checkout, e.g. a Lucky Dip bonus the draw's promo cap no longer allows. */
   notice: string | null;
   /** The next bundle up, for "Upgrade to … for +£X". */
   upgrade: { bundleId: number; label: string; tickets: number; freeQuantity: number; extraPence: Pence } | null;

@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 
 /**
- * The Gimme Gimme splash: glossy paint drops in the brand pink, cyan and yellow, outlined in ink like the
+ * The Easy Peasy splash: glossy paint drops in the brand pink, cyan and yellow, outlined in ink like the
  * logo, flying out from behind a win. Decoration only, so it is hidden from screen readers and skipped
  * entirely with reduced motion.
  */

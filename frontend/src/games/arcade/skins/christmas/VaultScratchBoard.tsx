@@ -142,7 +142,7 @@ export function VaultScratchBoard({ ticket, seed, decoys, reducedMotion, onRevea
           </div>
           <div className="rg-scratch-foot">
             <span className="rg-scratch-ticket">Ticket {formatTicketNumber(ticket.ticketNumber)}</span>
-            <span className="rg-scratch-brand">GIMME GIMME</span>
+            <span className="rg-scratch-brand">EASY PEASY</span>
           </div>
         </div>
         </div>
