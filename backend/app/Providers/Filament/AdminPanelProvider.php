@@ -37,7 +37,7 @@ class AdminPanelProvider extends PanelProvider
             // Filament walks them through setting it up and gives recovery codes. Lost phone: gimme:reset-two-step.
             ->multiFactorAuthentication([AppAuthentication::make()->recoverable()], isRequired: true)
             ->brandName('Easy Peasy Admin')
-            // The site's look: near-black with neon pink, cyan and yellow, the logo and the site's own fonts
+            // The site's look: near-black navy with Easy Peasy pink and cyan, the logo and the site's own fonts
             // (served from public/css/filament/gimme, nothing third-party). Extra styling in public/css/filament/gimme/admin.css.
             ->brandLogo(fn () => view('filament.brand'))
             ->brandLogoHeight('2.75rem')
@@ -56,10 +56,10 @@ class AdminPanelProvider extends PanelProvider
                 'warning' => Color::hex('#ffd23a'),
                 'danger' => Color::hex('#ff4d6d'),
                 'gray' => [
-                    50 => 'oklch(0.975 0.006 310)', 100 => 'oklch(0.94 0.012 310)', 200 => 'oklch(0.87 0.02 310)',
-                    300 => 'oklch(0.76 0.03 310)', 400 => 'oklch(0.62 0.035 310)', 500 => 'oklch(0.5 0.035 310)',
-                    600 => 'oklch(0.4 0.035 310)', 700 => 'oklch(0.3 0.035 310)', 800 => 'oklch(0.22 0.03 310)',
-                    900 => 'oklch(0.17 0.025 310)', 950 => 'oklch(0.12 0.02 310)',
+                    50 => 'oklch(0.975 0.006 275)', 100 => 'oklch(0.94 0.012 275)', 200 => 'oklch(0.87 0.02 275)',
+                    300 => 'oklch(0.76 0.03 275)', 400 => 'oklch(0.62 0.035 275)', 500 => 'oklch(0.5 0.035 275)',
+                    600 => 'oklch(0.4 0.035 275)', 700 => 'oklch(0.3 0.035 275)', 800 => 'oklch(0.22 0.03 275)',
+                    900 => 'oklch(0.17 0.025 275)', 950 => 'oklch(0.12 0.02 275)',
                 ],
             ])
             ->navigationGroups([

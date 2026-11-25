@@ -52,7 +52,7 @@ class LiveDraw extends Page implements HasTable
                 TextColumn::make('title')->searchable()->wrap()
                     ->description(fn (Competition $c) => (string) ($c->end_prize_name ?? $c->title)),
                 TextColumn::make('closes_at')->label('Draw')->sortable()->dateTime('D j M Y, g:ia', 'Europe/London'),
-                TextColumn::make('status')->badge()->state(fn (Competition $c) => $state->status($c)),
+                TextColumn::make('status')->badge()->state(fn (Competition $c) => ucwords(str_replace('_', ' ', $state->status($c)))),
                 TextColumn::make('places')->label('Winners')->state(fn (Competition $c) => $c->endPrizeCount()),
             ])
             ->recordActions([
