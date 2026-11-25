@@ -1,0 +1,133 @@
+import { useEffect, useState } from "react";
+import { api, errorText } from "../lib/api";
+import { addBundle, onBasketChange, readBasket, removeFromBasket, setQuantity, upgradeLine } from "../lib/basket";
+import { trackAddToCart } from "../lib/consent";
+import { lineMakeup } from "../lib/bundles";
+import { formatMoney } from "../lib/money";
+import type { BasketLine, CompetitionSummary, PricedBasket } from "../lib/types";
+import { Svg } from "./Svg";
+
+export default function BasketView({ signedIn, gimmeBox = false }: { signedIn: boolean; gimmeBox?: boolean }) {
+  const [lines, setLines] = useState<BasketLine[] | null>(null);
+  const [priced, setPriced] = useState<PricedBasket | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [promo, setPromo] = useState("");
+  const [promoApplied, setPromoApplied] = useState<string | null>(null);
+  const [others, setOthers] = useState<CompetitionSummary[]>([]);
+
+  // Other live draws with a featured bundle, for "You might also like" under the basket.
+  useEffect(() => {
+    api<{ data: CompetitionSummary[] }>("/api/competitions?type=draw").then((r) => setOthers(r.data.filter((c) => c.status === "live" && c.featuredBundle))).catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    setLines(readBasket());
+    return onBasketChange(setLines);
+  }, []);
+
+  useEffect(() => {
+    if (!lines) return;
+    if (!lines.length) { setPriced(null); return; }
+    let live = true;
+    api<PricedBasket>("/api/basket/price", { json: { lines, promoCode: promoApplied } })
+      .then((p) => { if (live) { setPriced(p); setError(null); } })
+      .catch((e) => live && setError(errorText(e)));
+    return () => { live = false; };
+  }, [lines, promoApplied]);
+
+  if (lines === null) return <div className="card empty"><span className="spin" /> Loading your basket…</div>;
+  if (!lines.length) return (
+    <div className="card card-p stack g12" style={{ alignItems: "center", textAlign: "center" }} data-testid="basket-empty">
+      <span style={{ color: "#8E84A0" }}><Svg name="cart" size={36} /></span>
+      <div className="h3">Your Basket Is Empty</div>
+      <p className="p">Pick a competition and your tickets will wait here.</p>
+      <a className="btn btn-y gg-cta" href="/competitions">Browse Competitions</a>
+    </div>
+  );
+
+  const checkoutHref = signedIn ? "/checkout" : `/join?next=${encodeURIComponent("/checkout")}`;
+  return (
+    <div className="split">
+      <div className="stack g12">
+        {!priced && lines.map((l, i) => <div key={i} className="card card-p empty"><span className="spin" /></div>)}
+        {priced?.lines.map((pl) => (
+          <div key={`${pl.competitionId}:${pl.bundleId ?? "s"}`} className="card card-p stack g12 gg-card" data-testid="basket-line">
+            <div className="row g12" style={{ alignItems: "flex-start" }}>
+              <img src={pl.imageSmall} alt="" style={{ width: 76, height: 76, borderRadius: 14, objectFit: "cover", flexShrink: 0 }} />
+              <div className="stack g8" style={{ flex: 1, minWidth: 0 }}>
+                <div className="row between g8" style={{ alignItems: "flex-start" }}>
+                  <div style={{ minWidth: 0 }}>
+                    <a href={`/competitions/${pl.slug}`} className="d" style={{ fontSize: 18, lineHeight: 1.1, color: "#fff", textDecoration: "none" }}>{pl.title}</a>
+                    {(pl.bundleLabel || pl.bonusQuantity > 0) && <div className="row g8" style={{ marginTop: 4, flexWrap: "wrap" }}>
+                      {pl.bundleLabel && <span className="tag tag-y">{pl.bundleLabel}</span>}
+                      {pl.bonusQuantity > 0 && <span className="tag tag-c" data-testid="box-bonus">+{pl.bonusQuantity} Bonus</span>}
+                    </div>}
+                    <div className="hint">{lineMakeup(pl)}</div>
+                  </div>
+                  <button type="button" className="ib" aria-label={`Remove ${pl.title}${pl.bundleLabel ? ` (${pl.bundleLabel})` : ""}`} style={{ width: 44, height: 44, color: "#8E84A0" }} onClick={() => removeFromBasket(pl.competitionId, pl.bundleId)}><Svg name="trash" size={16} /></button>
+                </div>
+                <div className="row between">
+                  {pl.bundleId ? <span /> : (
+                    <div className="stepper">
+                      <button type="button" aria-label="One fewer ticket" style={{ width: 44, height: 44 }} onClick={() => setQuantity(pl.competitionId, pl.quantity - 1)}><Svg name="minus" size={16} stroke={2.6} /></button>
+                      <span className="qty" style={{ fontSize: 22, minWidth: 40 }}>{pl.quantity}</span>
+                      <button type="button" className="plus" aria-label="One more ticket" style={{ width: 44, height: 44 }} onClick={() => setQuantity(pl.competitionId, pl.quantity + 1)}><Svg name="plus" size={16} stroke={2.6} /></button>
+                    </div>
+                  )}
+                  <span className="d ny" style={{ fontSize: 22 }}>{formatMoney(pl.linePence)}</span>
+                </div>
+                {pl.problem && <div className="err" role="alert">{pl.problem}</div>}
+                {!pl.problem && pl.notice && <div className="hint" style={{ color: "#FFF23A" }} data-testid="line-notice">{pl.notice}</div>}
+              </div>
+            </div>
+            {pl.upgrade && (
+              <button type="button" className="upsell" data-testid="basket-upgrade" onClick={() => upgradeLine(pl.competitionId, pl.bundleId, pl.upgrade!.bundleId)}>
+                <span>Upgrade to <b>{pl.upgrade.label}</b> · {pl.upgrade.tickets} tickets</span>
+                <b className="ny">+{formatMoney(pl.upgrade.extraPence)}</b>
+              </button>
+            )}
+          </div>
+        ))}
+        {(() => {
+          const inBasket = new Set(lines.map((l) => l.competitionId));
+          const picks = others.filter((c) => !inBasket.has(c.id)).slice(0, 2);
+          return picks.length > 0 && (
+            <div className="stack g8" data-testid="cross-sell">
+              <div className="eyebrow">More Live Draws</div>
+              {picks.map((c) => (
+                <div key={c.id} className="card card-p row g12" style={{ alignItems: "center" }}>
+                  <img src={c.imageSmall} alt="" style={{ width: 52, height: 52, borderRadius: 12, objectFit: "cover", flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 900, lineHeight: 1.15 }}>{c.title}</div>
+                    <div className="hint">{c.featuredBundle!.label} · {c.featuredBundle!.tickets} tickets for {formatMoney(c.featuredBundle!.pricePence)}</div>
+                  </div>
+                  <button type="button" className="btn btn-y" style={{ minHeight: 44 }} onClick={() => { addBundle(c.id, c.featuredBundle!.id); trackAddToCart(c.slug, c.featuredBundle!.tickets, c.featuredBundle!.pricePence); }}>Add</button>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+      </div>
+      <div className="sticky">
+        <div className="card card-hot card-p stack g12">
+          <details className="acd" style={{ background: "transparent" }}>
+            <summary style={{ padding: 0, minHeight: 44 }}>Have A Promo Code? <Svg name="down" /></summary>
+            <form className="row g8" style={{ paddingTop: 10 }} onSubmit={(e) => { e.preventDefault(); setPromoApplied(promo.trim() || null); }}>
+              <input className="inp" placeholder="Enter code" aria-label="Promo code" value={promo} onChange={(e) => setPromo(e.target.value)} />
+              <button type="submit" className="btn btn-o">Apply</button>
+            </form>
+            {priced?.promo && <div className="hint" style={{ marginTop: 6 }}>{priced.promo.code}: −{formatMoney(priced.promo.discountPence)}</div>}
+          </details>
+          <div className="row between" style={{ fontWeight: 800 }}><span className="muted">{priced?.ticketCount ?? "…"} tickets · {new Set(lines.map((l) => l.competitionId)).size} {new Set(lines.map((l) => l.competitionId)).size === 1 ? "comp" : "comps"}</span></div>
+          <div className="row between" style={{ borderTop: "1px solid rgba(255,255,255,.1)", paddingTop: 12 }}><span className="d" style={{ fontSize: 22 }}>Total</span><span className="d ny" style={{ fontSize: 34 }} data-testid="basket-total">{priced ? formatMoney(priced.totalPence) : "…"}</span></div>
+          {signedIn && priced?.walletCovers && <div className="notice notice-c"><Svg name="wallet" size={18} /><span>Your wallet covers this — checkout takes one tap.</span></div>}
+          {(priced?.problems ?? []).map((p) => <div key={p} className="notice notice-p" role="alert"><Svg name="info" size={18} /><span>{p}</span></div>)}
+          {error && <div className="notice notice-p" role="alert"><Svg name="info" size={18} /><span>{error}</span></div>}
+          <a className="btn btn-y btn-lg btn-block gg-cta" href={checkoutHref} aria-disabled={!priced || priced.problems.length > 0 || priced.lines.some((l) => l.problem) ? "true" : undefined}>Checkout · {priced ? formatMoney(priced.totalPence) : "…"}</a>
+          <a className="btn btn-o btn-block" href="/competitions">Keep Browsing</a>
+          {gimmeBox && lines.every((l) => !l.boxId) && <a className="tap" style={{ textAlign: "center", fontWeight: 800 }} href="/gimme-box">Or let a Gimme Box pick for you</a>}
+        </div>
+      </div>
+    </div>
+  );
+}

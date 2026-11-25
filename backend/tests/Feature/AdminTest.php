@@ -1,0 +1,356 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Filament\Pages\Games;
+use App\Filament\Pages\PostalEntries;
+use App\Filament\Pages\SiteSettings;
+use App\Filament\Resources\Competitions\Pages\CreateCompetition;
+use App\Filament\Resources\Competitions\Pages\EditCompetition;
+use App\Filament\Resources\Competitions\Pages\ListCompetitions;
+use App\Filament\Resources\Orders\Pages\ListOrders;
+use App\Filament\Resources\Users\Pages\EditUser;
+use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Resources\Withdrawals\Pages\ListWithdrawals;
+use App\Filament\Widgets\LatestOrders;
+use App\Filament\Widgets\LiveCompetitions;
+use App\Filament\Widgets\Overview;
+use App\Filament\Widgets\SalesChart;
+use App\Models\AdminAction;
+use App\Models\Competition;
+use App\Models\Order;
+use App\Models\Page;
+use App\Models\PostalEntry;
+use App\Models\Setting;
+use App\Models\Withdrawal;
+use App\Notifications\TestEmail;
+use App\Services\CompetitionState;
+use App\Services\PlayCheck;
+use App\Services\Postal;
+use App\Services\Settings;
+use Database\Seeders\DemoSeeder;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
+use Filament\Facades\Filament;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
+use Tests\TestCase;
+
+class AdminTest extends TestCase
+{
+    private function signInAdmin()
+    {
+        $a = $this->admin();
+        $this->actingAs($a);
+        Filament::setCurrentPanel('admin');
+
+        return $a;
+    }
+
+    public function test_only_admins_reach_the_admin(): void
+    {
+        $this->get('/admin')->assertRedirect('/admin/login');
+        $this->actingAs($this->player())->get('/admin')->assertForbidden();
+        // An admin without two-step sign-in is sent to set it up first, whatever page they ask for.
+        $admin = $this->admin();
+        $setup = $this->actingAs($admin)->get('/admin/competitions');
+        $setup->assertRedirect();
+        $this->assertStringContainsString('multi-factor-authentication', (string) $setup->headers->get('Location'));
+        $this->get((string) $setup->headers->get('Location'))->assertOk()->assertSee('Set up two-factor authentication (2FA)', false);
+        $admin->saveAppAuthenticationSecret(app(AppAuthentication::class)->generateSecret());
+        $this->actingAs($admin->refresh())->get('/admin')->assertOk();
+        foreach (['competitions', 'orders', 'users', 'withdrawals', 'prize-claims', 'contact-messages', 'pages', 'promo-codes', 'site-settings', 'postal-entries', 'games', 'id-checks'] as $p) {
+            $this->get('/admin/'.$p)->assertOk();
+        }
+    }
+
+    public function test_every_admin_screen_opens_with_demo_data(): void
+    {
+        $this->seed(DemoSeeder::class);
+        Setting::put('feature_gimme_box', '1');
+        Setting::put('feature_referrals', '1');
+        $admin = $this->admin();
+        $admin->saveAppAuthenticationSecret(app(AppAuthentication::class)->generateSecret());
+        $this->actingAs($admin->refresh());
+        Filament::setCurrentPanel('admin');
+        $opened = [];
+        foreach (Filament::getPanel('admin')->getPages() as $page) {
+            $url = $page::getUrl();
+            $this->get($url)->assertOk();
+            $opened[] = $url;
+        }
+        foreach (Filament::getPanel('admin')->getResources() as $resource) {
+            $pages = $resource::getPages();
+            $record = $resource::getEloquentQuery()->first();
+            foreach (array_keys($pages) as $name) {
+                $needsRecord = in_array($name, ['edit', 'view'], true);
+                if ($needsRecord && ! $record) {
+                    continue;
+                }
+                $url = $resource::getUrl($name, $needsRecord ? ['record' => $record] : []);
+                $res = $this->get($url);
+                $this->assertSame(200, $res->getStatusCode(), "{$url} answered {$res->getStatusCode()}");
+                $opened[] = $url;
+            }
+        }
+        $this->assertGreaterThan(20, count(array_unique($opened)));
+    }
+
+    public function test_the_admin_sets_a_max_per_person_and_empty_means_no_limit(): void
+    {
+        // Owner, 22 Nov 2026: a per-person limit is set per competition (it was removed on 18 Nov).
+        $this->signInAdmin();
+        Storage::fake('public');
+        Livewire::test(CreateCompetition::class)->assertFormFieldExists('max_per_person');
+        Storage::disk('public')->put('competitions/nl.webp', 'img');
+        $c = Competition::query()->create(['slug' => 'nl', 'title' => 'NL', 'type' => 'draw', 'image' => 'competitions/nl.webp', 'price_pence' => 100, 'max_tickets' => 10, 'max_per_person' => 10, 'closes_at' => now()->addDays(10), 'end_prize_name' => 'Cash', 'end_prize_value_pence' => 1000]);
+        Livewire::test(EditCompetition::class, ['record' => $c->getKey()])->assertFormSet(['max_per_person' => null]) // equal to the tickets: shown as no limit
+            ->fillForm(['max_tickets' => 8000, 'max_per_person' => 250])->call('save')->assertHasNoFormErrors();
+        $this->assertSame(250, $c->refresh()->max_per_person);
+        Livewire::test(EditCompetition::class, ['record' => $c->getKey()])->fillForm(['max_per_person' => null])->call('save')->assertHasNoFormErrors();
+        $this->assertSame(8000, $c->refresh()->max_per_person, 'empty is no limit');
+        Livewire::test(EditCompetition::class, ['record' => $c->getKey()])->fillForm(['max_per_person' => 9000])->call('save')->assertHasFormErrors(['max_per_person']);
+    }
+
+    public function test_the_gimme_box_switch_starts_off_for_an_instant_win_and_on_for_a_draw(): void
+    {
+        // Owner, 22 Nov 2026: instant-win games can go in a Gimme Box once an admin switches them on.
+        $this->signInAdmin();
+        Livewire::test(CreateCompetition::class)->fillForm(['type' => 'instant'])->assertFormSet(['gimme_box_enabled' => false])->assertFormFieldExists('gimme_box_weight')
+            ->fillForm(['type' => 'draw'])->assertFormSet(['gimme_box_enabled' => true]);
+        $iw = $this->competition('instant');
+        Livewire::test(EditCompetition::class, ['record' => $iw->getKey()])->assertFormSet(['gimme_box_enabled' => false])->assertFormFieldExists('gimme_box_enabled');
+        $iw->update(['gimme_box_enabled' => true]);
+        $this->assertTrue($iw->refresh()->gimme_box_enabled, 'switched on after publishing: not a locked term');
+    }
+
+    public function test_the_games_page_lists_every_game_in_every_look(): void
+    {
+        $this->signInAdmin();
+        $page = Livewire::test(Games::class)->assertOk();
+        $games = $page->instance()->games();
+        $this->assertSame(['scratch_card', 'spin_wheel', 'bingo_card', 'balloon_pop', 'hook_a_duck', 'claw_machine', 'coin_drop', 'slots', 'gems', 'whack_a_mole', 'pinata'], array_column($games, 'id'));
+        $looks = collect($games)->mapWithKeys(fn ($g) => [$g['id'] => array_column($g['looks'], 'label')]);
+        $this->assertSame(['Classic', 'Christmas', 'Smash My Cash'], $looks['balloon_pop']);
+        $this->assertSame(['Classic'], $looks['pinata']);
+        $this->assertSame('/demo/spin_wheel?skin=cash_escape', collect($games)->firstWhere('id', 'spin_wheel')['looks'][2]['url']);
+        $page->assertSee('Whack-a-Mole')->assertSee('The Great Cash Escape')->assertSee('Open In New Tab');
+    }
+
+    public function test_the_competitions_list_offers_open_now_and_a_game_preview(): void
+    {
+        $this->signInAdmin();
+        $later = $this->competition('instant', ['opens_at' => now()->addDays(5), 'closes_at' => now()->addDays(20), 'skin' => 'christmas', 'game' => 'slots']);
+        $open = $this->competition('instant');
+        $draw = $this->competition('draw');
+
+        Livewire::test(ListCompetitions::class)
+            ->assertTableActionVisible('openNow', $later)->assertTableActionHidden('openNow', $open)
+            ->assertTableActionVisible('previewGame', $later)->assertTableActionHidden('previewGame', $draw)
+            ->assertTableActionHasUrl('previewGame', '/demo/slots?skin=christmas', $later)
+            ->callTableAction('openNow', $later, data: ['reason' => 'Open with the others'])->assertHasNoTableActionErrors();
+        $this->getJson('/api/competitions/'.$later->slug)->assertJsonPath('status', 'live');
+    }
+
+    public function test_a_players_marketing_consent_dates_show_read_only(): void
+    {
+        $this->signInAdmin();
+        $p = $this->player(['marketing_email' => true, 'marketing_email_consent_at' => '2025-03-12 10:00:00', 'marketing_sms' => true]);
+
+        // Shown in UK time; an opt-in with no date kept says so rather than guessing one.
+        Livewire::test(EditUser::class, ['record' => $p->getKey()])->assertOk()
+            ->assertSee('Marketing Consent')->assertSee('Agreed 12 Mar 2025, 10:00')->assertSee('Agreed, date not known')
+            ->fillForm(['first_name' => 'Pat'])->call('save')->assertHasNoFormErrors();
+        $p->refresh();
+        $this->assertSame('2025-03-12 10:00:00', $p->marketing_email_consent_at->toDateTimeString(), 'saving the form never changes a consent date');
+        $this->assertNull($p->marketing_sms_consent_at);
+
+        $q = $this->player(['email' => 'no-marketing@example.com']);
+        Livewire::test(EditUser::class, ['record' => $q->getKey()])->assertSee('Not agreed');
+    }
+
+    public function test_the_dashboard_shows_the_gimme_gimme_look_and_nothing_from_other_sites(): void
+    {
+        $admin = $this->admin();
+        $admin->saveAppAuthenticationSecret(app(AppAuthentication::class)->generateSecret());
+        $page = $this->actingAs($admin->refresh())->get('/admin')->assertOk();
+        $page->assertSee('css/filament/gimme/admin.css', false)->assertSee('css/filament/gimme/logo.webp', false)
+            ->assertSee('Good ', false);
+        $html = (string) $page->getContent();
+        foreach (['ui-avatars.com', 'fonts.bunny.net', 'fonts.googleapis.com'] as $host) {
+            $this->assertStringNotContainsString($host, $html, "the admin must not load anything from {$host}");
+        }
+        foreach (['admin.css', 'fonts.css', 'logo.webp', 'favicon.png', 'nunito-latin.woff2', 'lilita-one-latin.woff2'] as $f) {
+            $this->assertFileExists(public_path('css/filament/gimme/'.$f));
+        }
+        Filament::setCurrentPanel('admin');
+        foreach ([Overview::class, SalesChart::class, LiveCompetitions::class, LatestOrders::class] as $w) {
+            Livewire::test($w)->assertOk();
+        }
+    }
+
+    public function test_two_step_secrets_are_encrypted_and_never_sent_to_the_site(): void
+    {
+        $admin = $this->admin();
+        $admin->saveAppAuthenticationSecret('JBSWY3DPEHPK3PXP');
+        $admin->saveAppAuthenticationRecoveryCodes(['aaaa-bbbb']);
+        $raw = DB::table('users')->where('id', $admin->id)->first();
+        $this->assertStringNotContainsString('JBSWY3DPEHPK3PXP', (string) $raw->app_authentication_secret);
+        $this->assertArrayNotHasKey('app_authentication_secret', $admin->refresh()->toArray());
+        $this->actingAs($admin)->getJson('/api/me')->assertJsonMissingPath('app_authentication_secret');
+
+        $this->artisan('gimme:reset-two-step', ['email' => $admin->email])->assertSuccessful();
+        $this->assertNull($admin->refresh()->getAppAuthenticationSecret());
+    }
+
+    public function test_create_an_instant_win_competition_with_prizes_then_publish_it(): void
+    {
+        $this->signInAdmin();
+        Storage::fake('public');
+        Storage::disk('public')->put('competitions/x.webp', 'img');
+        Livewire::test(CreateCompetition::class)->fillForm([
+            'title' => 'Cash Bang', 'slug' => 'cash-bang', 'type' => 'instant', 'game' => 'balloon_pop', 'skin' => 'christmas',
+            'image' => null, 'price_pence' => '0.25', 'max_tickets' => 1000,
+            'closes_at' => now('Europe/London')->addDays(10)->format('Y-m-d H:i'),
+            'prizes' => [['name' => '£100 Cash', 'value_pence' => '100.00', 'type' => 'cash', 'quantity' => 1], ['name' => '50p Credit', 'value_pence' => '0.50', 'type' => 'site_credit', 'quantity' => 300]],
+        ])->call('create')->assertHasFormErrors(['image']);
+
+        $c = Competition::query()->create(['slug' => 'cash-bang', 'title' => 'Cash Bang', 'type' => 'instant', 'game' => 'balloon_pop', 'image' => 'competitions/x.webp',
+            'price_pence' => 25, 'max_tickets' => 1000, 'max_per_person' => 200, 'closes_at' => now()->addDays(10)]);
+        $c->prizes()->createMany([['name' => '£100 Cash', 'value_pence' => 10000, 'type' => 'cash', 'quantity' => 1], ['name' => '50p Credit', 'value_pence' => 50, 'type' => 'site_credit', 'quantity' => 300]]);
+
+        Livewire::test(EditCompetition::class, ['record' => $c->getKey()])
+            ->assertFormSet(['price_pence' => '0.25', 'title' => 'Cash Bang'])
+            ->fillForm(['price_pence' => '0.30'])->call('save')->assertHasNoFormErrors();
+        $this->assertSame(30, $c->refresh()->price_pence, 'pounds typed, pence stored');
+
+        Livewire::test(ListCompetitions::class)->callTableAction('publish', $c);
+        $c->refresh();
+        $this->assertStringStartsWith('VTY-', $c->verity_ref);
+        $this->assertSame('/storage/competitions/x.webp', $c->imageUrl());
+        $this->assertTrue(AdminAction::query()->where('action', 'competition.published')->exists());
+        $this->getJson('/api/competitions/cash-bang')->assertOk()->assertJsonPath('prizes.0.name', '£100 Cash')->assertJsonPath('prizes.1.quantity', 300);
+
+        // Terms are fixed once published.
+        $this->expectException(\DomainException::class);
+        $c->forceFill(['price_pence' => 1])->save();
+    }
+
+    public function test_publishing_refuses_an_incomplete_competition(): void
+    {
+        $this->signInAdmin();
+        $c = Competition::query()->create(['slug' => 'x', 'title' => 'X', 'type' => 'instant', 'price_pence' => 25, 'max_tickets' => 10, 'max_per_person' => 20, 'closes_at' => now()->addMinute()]);
+        Livewire::test(ListCompetitions::class)->callTableAction('publish', $c)->assertNotified('Not published');
+        $this->assertNull($c->refresh()->verity_ref);
+    }
+
+    public function test_the_sales_switch_needs_a_reason_and_is_recorded(): void
+    {
+        $this->signInAdmin();
+        Setting::put('sales_open', '0');
+        Livewire::test(SiteSettings::class)->callAction('sales', ['reason' => 'Launch day']);
+        $this->assertTrue(Setting::bool('sales_open'));
+        $this->assertSame('Launch day', AdminAction::query()->where('action', 'sales.opened')->value('reason'));
+
+        Livewire::test(SiteSettings::class)->fillForm(['min_card_pence' => '2.00'])->call('save')->assertHasNoFormErrors();
+        $this->assertSame(200, Settings::minCard());
+    }
+
+    public function test_rejecting_a_withdrawal_returns_the_winnings(): void
+    {
+        $this->signInAdmin();
+        $u = $this->player(['id_verified_at' => now()]);
+        $this->topUp($u, 5000, 'winnings');
+        $this->actingAs($u)->postJson('/api/me/withdrawals', ['amountPence' => 3000, 'accountName' => 'Pat Player', 'sortCode' => '123456', 'accountNumber' => '12345678'])->assertCreated();
+        $this->signInAdmin();
+        $w = Withdrawal::query()->first();
+        Livewire::test(ListWithdrawals::class)->callTableAction('reject', $w, ['note' => 'Bank details did not match']);
+        $this->assertSame('rejected', $w->refresh()->status);
+        $this->assertSame(5000, $this->wallet()->balances($u)['winnings']);
+        // Deciding twice changes nothing.
+        Livewire::test(ListWithdrawals::class)->assertTableActionHidden('reject', $w);
+    }
+
+    public function test_wallet_credit_needs_the_amount_typed_again_and_is_capped(): void
+    {
+        $this->signInAdmin();
+        $u = $this->player();
+        Livewire::test(ListUsers::class)->callTableAction('credit', $u, ['bucket' => 'deposit', 'amount' => '5.00', 'reason' => 'Goodwill', 'confirm' => 'ADD 4.00']);
+        $this->assertSame(0, $this->wallet()->total($u));
+        Livewire::test(ListUsers::class)->callTableAction('credit', $u, ['bucket' => 'deposit', 'amount' => '501.00', 'reason' => 'Goodwill', 'confirm' => 'ADD 501.00']);
+        $this->assertSame(0, $this->wallet()->total($u));
+        Livewire::test(ListUsers::class)->callTableAction('credit', $u, ['bucket' => 'deposit', 'amount' => '5.00', 'reason' => 'Goodwill', 'confirm' => 'add 5.00']);
+        $this->assertSame(500, $this->wallet()->total($u));
+    }
+
+    public function test_holds_block_play_and_are_recorded(): void
+    {
+        $this->signInAdmin();
+        $u = $this->player();
+        Livewire::test(ListUsers::class)->callTableAction('hold', $u, ['reason' => 'Chargeback']);
+        $this->assertSame('on_hold', app(PlayCheck::class)->block($u->refresh()));
+        $this->expectException(\DomainException::class);
+        $u->delete();
+    }
+
+    public function test_orders_needing_attention_can_be_marked_handled(): void
+    {
+        $this->signInAdmin();
+        $u = $this->player();
+        $o = Order::query()->create(['number' => 'GG-ATTN0001', 'user_id' => $u->id, 'order_type' => 'tickets', 'status' => 'paid', 'total_pence' => 100, 'card_pence' => 100, 'needs_attention' => true, 'attention_reason' => 'Sold out']);
+        Livewire::test(ListOrders::class)->assertCanSeeTableRecords([$o])->callTableAction('resolve', $o, ['reason' => 'Refunded by hand']);
+        $this->assertFalse($o->refresh()->needs_attention);
+    }
+
+    public function test_postal_entries_have_the_same_chance_and_the_same_checks(): void
+    {
+        $admin = $this->signInAdmin();
+        $u = $this->player(['email' => 'post@example.com']);
+        $c = $this->competition('draw', ['max_per_person' => 2]);
+
+        Livewire::test(PostalEntries::class)->fillForm(['competition_id' => $c->id, 'email' => 'post@example.com', 'received_at' => now('Europe/London')->subHour()->format('Y-m-d H:i')])->call('log');
+        $this->assertSame('entered', PostalEntry::query()->latest('id')->value('status'));
+        $this->assertSame(1, app(CompetitionState::class)->held($c, $u->ownerRef()));
+
+        $postal = app(Postal::class);
+        $this->assertSame('No account with a confirmed email address matches.', $postal->log($c, 'nobody@example.com', now(), $admin)->reason);
+        $this->assertSame('Received after the closing time.', $postal->log($c, 'post@example.com', $c->closes_at->copy()->addMinute(), $admin)->reason);
+        $u->forceFill(['self_excluded_until' => now()->addMonth()])->save();
+        $this->assertSame('refused', $postal->log($c, 'post@example.com', now(), $admin)->status);
+        $u->forceFill(['self_excluded_until' => null])->save();
+        $postal->log($c, 'post@example.com', now(), $admin);
+        $this->assertSame('refused', $postal->log($c, 'post@example.com', now(), $admin)->status, 'per-person limit counts postal entries');
+    }
+
+    public function test_legal_pages_get_heading_ids_for_their_contents_list(): void
+    {
+        Page::query()->whereKey('terms')->delete(); // the migration loads the real wording
+        Page::query()->create(['slug' => 'terms', 'title' => 'Terms & Conditions', 'version' => '1.0', 'html' => '<h2>1. About Us</h2><p>Hi</p><h2>1. About Us</h2>']);
+        $r = $this->getJson('/api/pages/terms')->assertOk()->json();
+        $this->assertSame([['id' => '1-about-us', 'text' => '1. About Us'], ['id' => '1-about-us-2', 'text' => '1. About Us']], $r['headings']);
+    }
+
+    public function test_an_admin_can_send_a_test_email_and_sees_the_result(): void
+    {
+        $this->signInAdmin();
+        config(['mail.default' => 'log']);
+        Livewire::test(SiteSettings::class)->callAction('testEmail', ['to' => 'me@example.com'])->assertNotified('Email is not switched on');
+
+        config(['mail.default' => 'smtp', 'mail.mailers.smtp.host' => '127.0.0.1', 'mail.mailers.smtp.port' => 1, 'mail.mailers.smtp.timeout' => 2]);
+        Livewire::test(SiteSettings::class)->callAction('testEmail', ['to' => 'me@example.com'])->assertNotified('The email was not sent');
+
+        Notification::fake();
+        Livewire::test(SiteSettings::class)->callAction('testEmail', ['to' => 'me@example.com'])->assertNotified('Sent');
+        $this->assertSame(1, AdminAction::query()->where('action', 'email.test_sent')->count());
+        // It's the branded email, not plain text.
+        Notification::assertSentOnDemand(TestEmail::class,
+            fn ($n, $channels, $notifiable) => $notifiable->routes['mail'] === 'me@example.com');
+    }
+
+    public function test_the_resend_api_mailer_is_installed(): void
+    {
+        config(['mail.default' => 'resend', 'services.resend.key' => 're_test_only']);
+        $this->assertSame('resend', (string) app('mail.manager')->mailer('resend')->getSymfonyTransport());
+    }
+}

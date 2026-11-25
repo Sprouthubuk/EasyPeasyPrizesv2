@@ -1,0 +1,182 @@
+---
+import { gameName } from "../../lib/gameLabels";
+import Layout from "../../layouts/Layout.astro";
+import CompCard from "../../components/CompCard.astro";
+import Countdown from "../../components/Countdown.astro";
+import HeroImage from "../../components/HeroImage.astro";
+import Icon from "../../components/Icon.astro";
+import TicketPicker from "../../islands/TicketPicker";
+import type { CompetitionDetail, CompetitionSummary, WinningNumbersPage } from "../../lib/types";
+import { formatPence, formatCount } from "../../lib/money";
+import { ukDateTime, ukDayMonth, ukShortDay } from "../../lib/time";
+import { breadcrumbLd, competitionDescription, competitionTitle, pageTitle } from "../../lib/seo";
+
+const { api, site, me } = Astro.locals;
+const slug = Astro.params.slug!;
+const othersCall = () => api.get<{ data: CompetitionSummary[] }>("/api/competitions?status=live");
+const early = api.hasSession() ? othersCall() : null;
+early?.catch(() => undefined); // still rejects where it is awaited; this only stops an early failure crashing Node
+const c = await api.maybe<CompetitionDetail>(`/api/competitions/${encodeURIComponent(slug)}`);
+if (!c) return Astro.rewrite("/404");
+const numbersCall = c.type === "instant" && c.verityRef ? api.maybe<WinningNumbersPage>(`/api/competitions/${encodeURIComponent(slug)}/winning-numbers`) : Promise.resolve(null);
+numbersCall.catch(() => undefined);
+const { data: others } = await (early ?? othersCall());
+const numbers = await numbersCall.catch(() => null);
+const more = others.filter((o) => o.id !== c.id && o.type === c.type).slice(0, 3);
+const isDraw = c.type === "draw";
+const prizesLeft = c.prizes.reduce((n, p) => n + (p.quantity - p.won), 0);
+const prizesWon = c.prizes.reduce((n, p) => n + p.won, 0);
+const prizesTotal = prizesLeft + prizesWon;
+const open = c.status === "live";
+const opensLater = c.status === "scheduled" && c.opensAt ? c.opensAt : null;
+const presets = c.presets?.length ? c.presets : isDraw ? [1, 5, 10, 25] : [5, 10, 25, 50];
+const endCount = c.endPrize?.count ?? 0;
+const endPrizeLine = c.endPrize ? `${endCount > 1 ? `${endCount} × ` : ""}${formatPence(c.endPrize.valuePence, { short: false })}` : "";
+const glow = ["np", "nc", "ny"];
+const [first, ...rest] = c.title.split(" – ");
+const ticketCounts = (max: number, sold: number, left: number) => `Max ${max.toLocaleString("en-GB")} tickets · ${sold.toLocaleString("en-GB")} sold · ${left.toLocaleString("en-GB")} left`;
+---
+<Layout title={c.title} fullTitle={pageTitle(competitionTitle(c))} active="competitions" description={competitionDescription(c)} shareImage={c.image} jsonLd={[breadcrumbLd(new URL(Astro.site ?? Astro.url).origin, [["Home", "/"], [isDraw ? "Live Draws" : "Instant Wins", `/competitions?type=${isDraw ? "draw" : "instant"}`], [c.title, `/competitions/${c.slug}`]])]}>
+<div class="lft">
+  <section style="padding:12px 0 24px"><div class="wrap stack g16">
+    <a href="/competitions" class="row g8 mob" style="color:#B9AFC6;text-decoration:none;font-weight:800;font-size:14px;min-height:44px"><Icon name="back" size={18} />All Competitions</a>
+    <nav aria-label="Breadcrumb" class="dsk crumbs" style="font-size:13px;font-weight:800;color:#8E84A0"><a href="/">Home</a> / <a href={`/competitions?type=${c.type}`}>{isDraw ? "Live Draws" : "Instant Wins"}</a> / <span style="color:#fff">{c.title}</span></nav>
+    <div class="split">
+      <div class="stack g16">
+        <HeroImage src={c.image} srcset={c.imageSrcset} alt={c.title}>
+          {isDraw
+            ? <span class="tag tag-c" style="position:absolute;top:14px;left:14px;background:rgba(7,5,11,.88)"><span class="gg-ping" style="width:7px;height:7px;border-radius:999px;background:#22E6FF"></span> Live Draw</span>
+            : <span class="tag tag-y" style="position:absolute;top:14px;left:14px;background:rgba(7,5,11,.88)"><Icon name="bolt" size={11} stroke={3} /> {gameName(c)}</span>}
+        </HeroImage>
+      </div>
+      <div class="stack g16 sticky">
+        <div class="gg-rise gg-d2">
+          <div class="eyebrow">{isDraw ? "Live draw" : `Instant win${prizesTotal ? ` · ${formatCount(prizesTotal)} prizes` : ""}`}</div>
+          <h1 class="h1" style="margin-top:6px"><span class="np gg-flicker">{first}</span>{rest.length > 0 && <><br>{rest.join(" – ")}</>}</h1>
+          <div class="row wrapx g8" style="margin-top:12px">
+            {c.topPrizePence && !isDraw && <span class="tag tag-y">Top prize {formatPence(c.topPrizePence, { short: false })}</span>}
+            {c.cashAlternativePence && <span class="tag tag-y">{formatPence(c.cashAlternativePence, { short: false })} cash alternative</span>}
+            {!isDraw && prizesTotal > 0 && <span class="tag tag-c">{formatCount(prizesLeft)} prizes left</span>}
+            {isDraw && c.drawAt && <span class="tag tag-c">Draw {ukDateTime(c.drawAt)}</span>}
+            {opensLater && <span class="tag tag-c">Opens {ukDateTime(opensLater)}</span>}
+            <span class="tag tag-w">Closes {ukDateTime(c.closesAt)}</span>
+          </div>
+        </div>
+        <div class={`card card-p stack g12 gg-rise gg-d3 ${isDraw ? "card-cy" : ""}`}>
+          {opensLater && <span class="eyebrow">Entries open in</span>}
+          {isDraw && !opensLater && <div class="row between"><span class="eyebrow">Draw starts in</span><span class="eyebrow" style="color:#22E6FF">Winner picked at random</span></div>}
+          <Countdown until={opensLater ?? (isDraw && c.drawAt ? c.drawAt : c.closesAt)} />
+          <div class={`bar ${isDraw ? "cy" : ""}`} data-sold-bar={c.slug}><div class="gg-shine" style={`width:${c.soldPercent > 0 ? Math.max(c.soldPercent, 2) : 0}%`}></div></div>
+          <div class="row between hint"><span data-sold-text={c.slug}><b>{c.status === "sold_out" ? "SOLD OUT" : `${c.soldPercent}% SOLD`}</b>{c.status !== "sold_out" && c.soldPercent >= 90 && <span class="ny"> · Almost gone!</span>}</span><span>{isDraw ? "" : "Results fixed when you buy"}</span></div>
+          <div class="tcounts" data-testid="ticket-counts"><span data-ticket-counts={c.slug}>{ticketCounts(c.maxTickets, c.ticketsSold, c.ticketsLeft)}</span>{c.maxPerPerson ? ` · Max ${c.maxPerPerson.toLocaleString("en-GB")} per person` : ""}</div>
+        </div>
+        <TicketPicker client:load competitionId={c.id} slug={c.slug} type={c.type} pricePence={c.pricePence} presets={presets} popularPreset={c.popularPreset ?? null} minTickets={c.minTickets ?? 1} bundles={c.bundles ?? []} soldPercent={c.soldPercent} soldOut={c.status === "sold_out"} maxPerPerson={c.maxPerPerson ?? null} heldByMe={c.heldByMe ?? 0} open={open} opensAt={opensLater} salesOpen={site.salesOpen} signedIn={!!me} playBlock={me?.playBlock ?? null} />
+        {c.type === "draw" && site.gimmeBox?.available && <a class="tap" href="/gimme-box" style="font-weight:800" data-testid="gb-link">Can't decide? Try a Gimme Box →</a>}
+        <p class="hint" style="margin:0">No purchase necessary — <a href="/free-entry">enter free by post</a> with the same chance of winning. 18+ UK only · <a href="/legal/terms">T&amp;Cs</a></p>
+      </div>
+    </div>
+  </div></section>
+
+  {!isDraw && c.prizes.length > 0 && (
+    <section class="sec" style="padding-top:8px"><div class="wrap stack g16">
+      <div class="stack g12 gg-reveal">
+        <h2 class="h2">Instant <span class="np">Wins</span></h2>
+        <div class="row wrapx g12">
+          <span class="iw-left"><span class="ic"><Icon name="bolt" size={16} stroke={2.6} /></span><span><b class="d nc">{formatCount(prizesLeft)}</b><small>Instant prizes left to win</small></span></span>
+          {numbers && numbers.total > 0 && <a class="tap" href={`/competitions/${c.slug}/winning-numbers`}>See all {formatCount(numbers.total)} winning numbers →</a>}
+        </div>
+        <p class="p" style="font-size:14px;margin:0">Every winning ticket number is public from the start. Tickets are given out at random the moment you pay: land a winning number and the prize is yours on the spot.</p>
+      </div>
+      <div class="iw-grid gg-stagger" data-testid="instant-prizes">
+        {c.prizes.map((p, i) => {
+          const left = p.quantity - p.won;
+          const done = left <= 0;
+          return (
+            <a class={`iw gg-card ${done ? "done" : ""}`} href={`/competitions/${c.slug}/winning-numbers?${new URLSearchParams({ prize: p.name })}`}>
+              <img src={c.imageSmall} alt="" loading="lazy" decoding="async" width="80" height="80" />
+              <div class="iw-b">
+                <span class="row between g8" style="align-items:flex-start">
+                  <span style="min-width:0"><b class={`d iw-v ${done ? "" : glow[i % 3]}`}>{formatPence(p.valuePence, { short: false })}</b><span class="iw-n">{p.name}{p.addedAt && <span class="tag-added">Added {ukDayMonth(p.addedAt)}</span>}</span></span>
+                  {done
+                    ? <span class="iw-c"><b class="d">All Found</b><small>{formatCount(p.won)} won</small></span>
+                    : <span class="iw-c"><b class="d nc">{formatCount(left)}</b><small>Left to win</small></span>}
+                </span>
+                <div class="bar cy" style="height:5px"><div style={`width:${p.quantity ? Math.max((p.won / p.quantity) * 100, p.won ? 3 : 0) : 0}%`}></div></div>
+                <span class="row between g8 iw-f"><span><b>{formatCount(p.won)}</b> of {formatCount(p.quantity)} found</span><span class="iw-l">Winning tickets →</span></span>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+      {!isDraw && c.boost && (
+        <details id="prize-boost" class="boost-banner stack g8" data-testid="boost-banner">
+          <summary style="cursor:pointer;min-height:44px">🔥 Prize Boost – {formatPence(c.boost.addedPence, { short: false })} extra instant wins added: {formatCount(c.boost.addedCount)} more prizes since {ukDayMonth(c.boost.addedAt)}.{" "}<span class="boost-how">How they were added</span></summary>
+          {(c.boostRecord ?? []).map((b) => (
+            <div class="stack g8">
+              <p class="p" style="margin:8px 0 0;font-size:14px">On {ukDateTime(b.addedAt)} our draw engine, Verity, added {formatCount(b.prizeCount)} instant prizes worth {formatPence(b.valuePence, { short: false })} ({b.reason}). Every original prize and winning number stayed exactly as it was, and the new prizes went only on ticket numbers nobody had: the {formatCount(b.excludedCount)} tickets already sold or already winning were left out, and so were {formatCount(b.windowCount)} sold while it ran.</p>
+              <p class="p" style="margin:0;font-size:14px">The new numbers come from {b.beaconRound ? <>public drand randomness, round <b>{b.beaconRound}</b>, which Verity committed to before it existed</> : "local test randomness"}. It's all on Verity's audit chain and checked on the <a href={c.verifyUrl ?? "#"}>fair-play record</a>.</p>
+              <div class="hint" style="word-break:break-all;font-size:12px">Randomness {b.beaconRandomness}<br>Left-out numbers fingerprint {b.excludedHash}<br>Added table fingerprint {b.tableHash}</div>
+            </div>
+          ))}
+        </details>
+      )}
+      {c.endPrize && (
+        <div class="card card-cy card-p row g12 gg-reveal" data-testid="end-prize">
+          <span class="d nc" style="font-size:22px;white-space:nowrap">{endPrizeLine}</span>
+          <div style="flex:1;min-width:0"><div style="font-weight:900">{endCount > 1 ? "End Prizes" : "End Prize"}: {c.endPrize.name}</div><div class="hint" style="font-size:13px">Drawn {c.drawAt ? ukDateTime(c.drawAt) : "at the close"} from every entry, instant winners included{endCount > 1 ? ". You can win more than one" : ""}.</div></div>
+        </div>
+      )}
+    </div></section>
+  )}
+
+  {isDraw && (
+    <section class="sec" style="padding-top:8px"><div class="wrap stack g12">
+      <div class="gg-reveal"><div class="eyebrow">How draw night works</div><h2 class="h2">Drawn <span class="np">Live</span>, Totally Random</h2></div>
+      <div class="tl gg-stagger">
+        <div class="gg-card"><span class="d np" style="font-size:26px;width:38px">01</span><div><div style="font-weight:900">Entries Close</div><div class="hint" style="font-size:13px">{ukDateTime(c.closesAt)}</div></div></div>
+        <div class="gg-card"><span class="d nc" style="font-size:26px;width:38px">02</span><div><div style="font-weight:900">Entry List Open Throughout</div><div class="hint" style="font-size:13px">Every ticket number is public from the first sale</div></div></div>
+        <div class="gg-card"><span class="d ny" style="font-size:26px;width:38px">03</span><div><div style="font-weight:900">Winner Picked Live</div><div class="hint" style="font-size:13px">A random draw anyone can verify, revealed here{c.drawAt ? ` at ${ukShortDay(c.drawAt)}` : ""}</div></div></div>
+        <div class="gg-card"><span class="d np" style="font-size:26px;width:38px">04</span><div><div style="font-weight:900">Prize On Its Way</div><div class="hint" style="font-size:13px">We contact the winner{c.cashAlternativePence ? ` — or pay the ${formatPence(c.cashAlternativePence, { short: false })} cash alternative` : ""}</div></div></div>
+      </div>
+    </div></section>
+  )}
+
+  <section class="sec" style="padding-top:8px"><div class="wrap stack g16">
+    <h2 class="h2 gg-reveal">More <span class="nc">Information</span></h2>
+    <div class="card card-p stack g16 info gg-reveal" data-testid="more-information">
+      <div class="info-d" set:html={c.description.replace(/</g, "&lt;").replace(/\n/g, "<br>")}></div>
+      {c.howToPlay && <p class="info-d" style="margin:0"><b>How to play:</b>{" "}{c.howToPlay}</p>}
+      <div class="info-f">
+        <span>18+ UK residents only{(c.minTickets ?? 1) > 1 ? ` · Minimum ${formatCount(c.minTickets)} tickets per order` : ""}</span>
+        <span>Every ticket has the same chance: bundle and free tickets are entered into the draw exactly like paid tickets, and so are free postal entries.</span>
+        <span class="row wrapx" style="gap:4px 16px">
+          <a class="tap" href="/free-entry">Free postal entry</a>
+          <a class="tap" href={`/entry-lists/${c.slug}`}>Entry list</a>
+          {c.verifyUrl && <a class="tap" href={c.verifyUrl}>Fair play record {c.verityRef}</a>}
+          <a class="tap" href="/legal/terms">T&amp;Cs</a>
+        </span>
+        {(c.renamedPrizes ?? []).length > 0 && <span data-testid="renamed-prizes">Renamed prizes: {c.renamedPrizes.map((r) => `${r.to} (${r.from} in the fair play record)`).join(", ")}.</span>}
+        {c.commitment && <span style="word-break:break-all;font-size:12px">Seed fingerprint <code style="color:#22E6FF">{c.commitment}</code></span>}
+      </div>
+    </div>
+  </div></section>
+
+  {more.length > 0 && <section class="sec"><div class="wrap stack g16"><h2 class="h2 gg-reveal">{isDraw ? <>More <span class="nc">Draws</span></> : <>You Might <span class="np">Also Like</span></>}</h2><div class="rail gg-stagger">{more.map((o) => <CompCard c={o} />)}</div></div></section>}
+</div>
+{open && <div class="mob" style="height:72px" aria-hidden="true"></div>}
+<script define:vars={{ slug: c.slug, title: c.title, price: c.pricePence }}>
+  window.addEventListener("load", () => window.ggTrack?.("ViewContent", { content_ids: [slug], content_name: title, content_type: "product", value: price / 100, currency: "GBP" }));
+  // The ticket picker re-reads % sold every minute; keep the bar and its words in step.
+  window.addEventListener("gg-sold", (e) => {
+    const { slug: s, percent, max, sold, left } = e.detail || {};
+    if (s !== slug) return;
+    const bar = document.querySelector(`[data-sold-bar="${slug}"] > div`);
+    if (bar) bar.style.width = `${percent > 0 ? Math.max(percent, 2) : 0}%`;
+    const text = document.querySelector(`[data-sold-text="${slug}"]`);
+    if (text) text.innerHTML = `<b>${percent}% SOLD</b>${percent >= 90 && percent < 100 ? '<span class="ny"> · Almost gone!</span>' : ""}`;
+    const counts = document.querySelector(`[data-ticket-counts="${slug}"]`);
+    const n = (v) => Number(v).toLocaleString("en-GB");
+    if (counts && Number.isFinite(max)) counts.textContent = `Max ${n(max)} tickets · ${n(sold)} sold · ${n(left)} left`;
+  });
+</script>
+</Layout>

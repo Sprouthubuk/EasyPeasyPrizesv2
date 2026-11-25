@@ -1,0 +1,206 @@
+<?php
+
+namespace App\Filament\Resources\Users;
+
+use Filament\Tables\Filters\Filter;
+
+use Filament\Actions\ViewAction;
+
+use App\Support\Reports;
+
+use App\Filament\Resources\Users\Pages\ViewUser;
+
+use App\Filament\Resources\Users\Pages\EditUser;
+use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Support\Money;
+use App\Models\AdminAction;
+use App\Models\User;
+use App\Services\Settings;
+use App\Services\Wallet;
+use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Table;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
+
+/** Players. Accounts are never deleted; money and holds change only through the actions here, each with a reason. */
+class UserResource extends Resource
+{
+    protected static ?string $model = User::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
+
+    protected static ?string $navigationLabel = 'Players';
+
+    protected static ?string $modelLabel = 'player';
+
+    protected static ?int $navigationSort = 3;
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Players & Money';
+
+    public const MAX_ADJUST_PENCE = 50000;
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema->components([
+            Section::make('Details')->columns(2)->components([
+                TextInput::make('first_name')->required()->maxLength(60),
+                TextInput::make('last_name')->required()->maxLength(60),
+                TextInput::make('email')->disabled(),
+                DatePicker::make('date_of_birth')->required()->before(now()->subYears(18)),
+                TextInput::make('phone')->maxLength(30),
+                TextInput::make('address_line1')->maxLength(120),
+                TextInput::make('address_line2')->maxLength(120),
+                TextInput::make('city')->maxLength(80),
+                TextInput::make('postcode')->maxLength(12),
+                Toggle::make('name_hidden')->label('Show as "Anonymous" on the site')
+                    ->helperText('For a player who asked not to be named: winners, winning numbers and entry lists show "Anonymous" (Terms 8.2).'),
+            ]),
+            // Read only: only the player changes their choices (or self-exclusion clears them).
+            Section::make('Marketing Consent')->columns(2)->components([
+                TextEntry::make('marketing_email_shown')->label('Email')->state(fn (?User $record) => self::consent($record?->marketing_email, $record?->marketing_email_consent_at)),
+                TextEntry::make('marketing_sms_shown')->label('SMS')->state(fn (?User $record) => self::consent($record?->marketing_sms, $record?->marketing_sms_consent_at)),
+            ]),
+        ]);
+    }
+
+    private static function consent(?bool $on, ?\DateTimeInterface $at): string
+    {
+        return match (true) {
+            ! $on => 'Not agreed',
+            $at === null => 'Agreed, date not known',
+            default => 'Agreed '.Carbon::instance($at)->timezone('Europe/London')->format('j M Y, H:i'),
+        };
+    }
+
+    public static function table(Table $table): Table
+    {
+        // Balances and lifetime figures as sub-selects, so they sort and filter in the database.
+        $bucket = fn (string $b) => fn ($q) => $q->from('wallet_ledger')->whereColumn('wallet_ledger.user_id', 'users.id')->where('wallet_ledger.bucket', $b)
+            ->selectRaw("COALESCE(SUM(CASE WHEN direction = 'credit' THEN amount_pence ELSE -amount_pence END), 0)");
+        $paid = fn ($q) => $q->from('orders')->whereColumn('orders.user_id', 'users.id')->where('orders.status', 'paid');
+
+        return $table
+            ->modifyQueryUsing(fn ($query) => $query->select('users.*')
+                ->selectSub($bucket('winnings'), 'winnings_pence')->selectSub($bucket('deposit'), 'deposit_pence')->selectSub($bucket('bonus'), 'bonus_pence')
+                ->selectSub(fn ($q) => $paid($q)->where('orders.order_type', 'tickets')->selectRaw('COALESCE(SUM(orders.total_pence), 0)'), 'spent_pence')
+                ->selectSub(fn ($q) => $paid($q)->selectRaw('COALESCE(SUM(orders.card_pence), 0)'), 'paid_in_pence')
+                ->selectSub(fn ($q) => $paid($q)->where('orders.paid_at', '>=', now()->subDays(7))->selectRaw('COALESCE(SUM(orders.card_pence), 0)'), 'paid_in_7d_pence')
+                ->selectSub(fn ($q) => $q->from('verity_winners as w')->whereRaw(Reports::ownerOf('w.owner_ref'))->where('w.status', 'active')
+                    ->selectRaw('COALESCE(SUM(w.prize_value_pence), 0)'), 'won_pence')
+                ->selectSub(fn ($q) => $paid($q)->selectRaw('MAX(orders.paid_at)'), 'last_order_at'))
+            ->defaultSort('created_at', 'desc')
+            ->recordUrl(fn (User $u) => self::getUrl('view', ['record' => $u]))
+            ->columns([
+                TextColumn::make('first_name')->label('Name')->formatStateUsing(fn ($state, User $u) => $u->first_name.' '.$u->last_name)->searchable(['first_name', 'last_name']),
+                TextColumn::make('email')->searchable()->copyable(),
+                TextColumn::make('winnings_pence')->label('Winnings')->sortable(query: fn ($query, string $direction) => $query->orderBy('winnings_pence', $direction))->formatStateUsing(fn ($state) => Money::show((int) $state))
+                    ->color(fn ($state) => (int) $state > 0 ? 'success' : null),
+                TextColumn::make('deposit_pence')->label('Deposit')->sortable(query: fn ($query, string $direction) => $query->orderBy('deposit_pence', $direction))->formatStateUsing(fn ($state) => Money::show((int) $state)),
+                TextColumn::make('bonus_pence')->label('Bonus')->sortable(query: fn ($query, string $direction) => $query->orderBy('bonus_pence', $direction))->formatStateUsing(fn ($state) => Money::show((int) $state)),
+                TextColumn::make('spent_pence')->label('Spent')->tooltip('Lifetime on tickets, card and wallet')->sortable(query: fn ($query, string $direction) => $query->orderBy('spent_pence', $direction))->formatStateUsing(fn ($state) => Money::show((int) $state)),
+                TextColumn::make('paid_in_7d_pence')->label('Paid In 7 Days')->sortable(query: fn ($query, string $direction) => $query->orderBy('paid_in_7d_pence', $direction))->formatStateUsing(fn ($state) => Money::show((int) $state))->toggleable(),
+                TextColumn::make('won_pence')->label('Won')->tooltip('Lifetime prize value')->sortable(query: fn ($query, string $direction) => $query->orderBy('won_pence', $direction))->formatStateUsing(fn ($state) => Money::show((int) $state)),
+                TextColumn::make('last_order_at')->label('Last Order')->sortable(query: fn ($query, string $direction) => $query->orderBy('last_order_at', $direction))->since('Europe/London')->placeholder('—')->toggleable(),
+                IconColumn::make('email_verified_at')->label('Email')->boolean()->state(fn (User $u) => $u->email_verified_at !== null),
+                IconColumn::make('id_verified_at')->label('ID')->boolean()->state(fn (User $u) => $u->id_verified_at !== null),
+                TextColumn::make('flags')->badge()->separator(',')->state(fn (User $u) => array_values(array_filter([
+                    $u->is_admin ? 'admin' : null, $u->is_staff ? 'staff' : null, $u->on_hold_at ? 'on hold' : null, $u->closed_at ? 'closed' : null,
+                    $u->self_excluded_until?->isFuture() ? 'self-excluded' : null, $u->cool_off_until?->isFuture() ? 'break' : null,
+                ]))),
+                TextColumn::make('created_at')->label('Joined')->date('j M Y', 'Europe/London')->sortable(),
+            ])
+            ->filters([
+                Filter::make('winnings')->label('Holding winnings')
+                    ->schema([TextInput::make('min')->label('Winnings of at least (£)')->numeric()->minValue(0)->default(null)])
+                    ->query(fn ($query, array $data) => filled($data['min'] ?? null) ? $query->whereRaw("(SELECT COALESCE(SUM(CASE WHEN direction = 'credit' THEN amount_pence ELSE -amount_pence END), 0) FROM wallet_ledger WHERE wallet_ledger.user_id = users.id AND wallet_ledger.bucket = 'winnings') >= ?", [(int) round(((float) $data['min']) * 100)]) : $query)
+                    ->indicateUsing(fn (array $data) => filled($data['min'] ?? null) ? 'Winnings ≥ £'.$data['min'] : null),
+                Filter::make('spender')->label('Paid in, last 7 days')
+                    ->schema([TextInput::make('min7')->label('Paid in over the last 7 days of at least (£)')->numeric()->minValue(0)->default(null)])
+                    ->query(fn ($query, array $data) => filled($data['min7'] ?? null) ? $query->whereRaw("(SELECT COALESCE(SUM(orders.card_pence), 0) FROM orders WHERE orders.user_id = users.id AND orders.status = 'paid' AND orders.paid_at >= ?) >= ?", [now()->subDays(7), (int) round(((float) $data['min7']) * 100)]) : $query)
+                    ->indicateUsing(fn (array $data) => filled($data['min7'] ?? null) ? '7-day paid in ≥ £'.$data['min7'] : null),
+                TernaryFilter::make('legacy_id')->label('From the old site')->nullable(),
+                TernaryFilter::make('on_hold_at')->label('On hold')->nullable(),
+                TernaryFilter::make('is_staff')->label('Staff'),
+            ])
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+                ActionGroup::make([
+                    self::reasoned('hold', 'Put on hold', fn (User $u) => ! $u->on_hold_at, function (User $u, string $reason) {
+                        $u->forceFill(['on_hold_at' => now(), 'on_hold_reason' => $reason])->save();
+                    }),
+                    self::reasoned('release', 'Release hold', fn (User $u) => (bool) $u->on_hold_at, function (User $u) {
+                        $u->forceFill(['on_hold_at' => null, 'on_hold_reason' => null])->save();
+                    }),
+                    self::reasoned('id_verified', 'Mark ID checked', fn (User $u) => ! $u->id_verified_at, function (User $u) {
+                        $u->forceFill(['id_verified_at' => now()])->save();
+                    }),
+                    self::reasoned('staff', 'Mark as staff (can’t play)', fn (User $u) => ! $u->is_staff, function (User $u) {
+                        $u->forceFill(['is_staff' => true])->save();
+                    }),
+                    self::reasoned('verify_email', 'Confirm email by hand', fn (User $u) => ! $u->email_verified_at, function (User $u) {
+                        $u->markEmailAsVerified();
+                    }),
+                    Action::make('credit')->label('Add wallet credit')->icon(Heroicon::OutlinedBanknotes)
+                        ->visible(fn (User $u) => $u->id !== auth()->id() && ! $u->is_admin && ! $u->is_staff)
+                        ->schema([
+                            Select::make('bucket')->options(['bonus' => 'Bonus (expires)', 'deposit' => 'Deposit', 'winnings' => 'Winnings (withdrawable)'])->default('bonus')->required(),
+                            Money::input('amount', 'Amount')->required(),
+                            Textarea::make('reason')->required()->maxLength(300),
+                            TextInput::make('confirm')->label('Type the amount again to confirm, e.g. ADD 5.00')->required(),
+                        ])
+                        ->action(function (User $u, array $data) {
+                            $pence = (int) $data['amount'];
+                            if ($pence < 1 || $pence > self::MAX_ADJUST_PENCE || trim(strtoupper($data['confirm'])) !== 'ADD '.number_format($pence / 100, 2, '.', '')) {
+                                Notification::make()->danger()->title('Not added')->body('Between £0.01 and '.Money::show(self::MAX_ADJUST_PENCE).', confirmed exactly.')->send();
+
+                                return;
+                            }
+                            $ref = 'admin:'.Str::uuid();
+                            app(Wallet::class)->credit($u, $data['bucket'], $pence, 'Added by us · '.mb_substr($data['reason'], 0, 80), $ref, null,
+                                $data['bucket'] === 'bonus' ? now()->addDays(Settings::bonusExpiryDays()) : null);
+                            AdminAction::record(auth()->user(), 'wallet.credit', (string) $u->id, $data['reason'], ['bucket' => $data['bucket'], 'pence' => $pence, 'ref' => $ref]);
+                            Notification::make()->success()->title(Money::show($pence).' added')->send();
+                        }),
+                ]),
+            ]);
+    }
+
+    private static function reasoned(string $name, string $label, \Closure $visible, \Closure $do): Action
+    {
+        return Action::make($name)->label($label)->visible($visible)->requiresConfirmation()
+            ->schema([Textarea::make('reason')->required()->maxLength(300)])
+            ->action(function (User $record, array $data) use ($name, $do) {
+                $do($record, $data['reason']);
+                AdminAction::record(auth()->user(), 'player.'.$name, (string) $record->id, $data['reason']);
+                Notification::make()->success()->title('Done')->send();
+            });
+    }
+
+    public static function getPages(): array
+    {
+        return ['index' => ListUsers::route('/'), 'view' => ViewUser::route('/{record}'), 'edit' => EditUser::route('/{record}/edit')];
+    }
+}
