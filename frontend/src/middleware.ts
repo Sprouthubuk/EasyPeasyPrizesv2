@@ -11,7 +11,7 @@ const FALLBACK_SITE: SiteInfo = {
   minWithdrawalPence: 2000,
   maxTopUpPence: 50000,
   featuredSlug: null,
-  socials: { instagram: null, facebook: null },
+  socials: { instagram: null, facebook: null, youtube: null, tiktok: null },
   supportEmail: null,
   metaPixelId: null,
 };

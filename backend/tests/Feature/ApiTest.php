@@ -38,6 +38,10 @@ class ApiTest extends TestCase
         $this->competition('draw', [], [], false); // not published: never listed
 
         $this->getJson('/api/site')->assertOk()->assertJson(['salesOpen' => true, 'minDepositPence' => 500, 'minCardPence' => 100, 'featuredSlug' => $draw->slug]);
+        $this->getJson('/api/site')->assertJsonPath('socials', [ // Easy Peasy's own accounts until changed in Admin → Settings; no X/Twitter
+            'instagram' => 'https://www.instagram.com/easypeasyprizes/', 'facebook' => 'https://www.facebook.com/groups/epfangroup',
+            'youtube' => 'https://www.youtube.com/@easypeasyprizes', 'tiktok' => 'https://www.tiktok.com/@easypeasyprizes',
+        ]);
         $list = $this->getJson('/api/competitions')->assertOk()->json('data');
         $this->assertSame([$draw->slug, $instant->slug], array_column($list, 'slug'));
         $this->assertSame('live', $list[1]['status']);
@@ -109,7 +113,7 @@ class ApiTest extends TestCase
 
     public function test_account_endpoints_need_a_session(): void
     {
-        foreach (['/api/me', '/api/me/tickets', '/api/me/limits', '/api/orders/GG-X'] as $p) {
+        foreach (['/api/me', '/api/me/tickets', '/api/me/limits', '/api/orders/EP-X'] as $p) {
             $this->getJson($p)->assertUnauthorized();
         }
         $this->postJson('/api/checkout', [])->assertUnauthorized();

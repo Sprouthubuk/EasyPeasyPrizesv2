@@ -143,7 +143,7 @@ function stubApi(price: PricedBasket, onCheckout?: (body: any) => unknown) {
     calls.push({ url, body });
     if (url.includes("csrf-cookie")) return new Response(null, { status: 204 });
     if (url.endsWith("/api/basket/price")) return Response.json(price);
-    if (url.endsWith("/api/checkout")) return Response.json(onCheckout?.(body) ?? { order: { number: "GG-9" }, next: "play" });
+    if (url.endsWith("/api/checkout")) return Response.json(onCheckout?.(body) ?? { order: { number: "EP-9" }, next: "play" });
     return new Response("{}", { status: 404 });
   }));
   return calls;
@@ -158,14 +158,14 @@ describe("checkout", () => {
     const btn = await screen.findByTestId("pay");
     expect(btn.textContent).toBe("Pay £2.50 From Wallet");
     fireEvent.click(btn);
-    await waitFor(() => expect(window.location.assign).toHaveBeenCalledWith("/order/GG-9"));
+    await waitFor(() => expect(window.location.assign).toHaveBeenCalledWith("/order/EP-9"));
     const co = calls.find((c) => c.url.endsWith("/api/checkout"))!.body;
     expect(co).toMatchObject({ lines: [{ competitionId: "c1", quantity: 10 }], payWith: "wallet", useWallet: true });
     expect(typeof co.requestId).toBe("string");
   });
 
   it("choosing the card when the wallet could pay it all pays by card, never 'Pay £0.00 By Card'", async () => {
-    const calls = stubApi(priced(100, true), () => ({ order: { number: "GG-11" }, next: "redirect", redirectUrl: "https://gateway-int.cashflows.com/y" }));
+    const calls = stubApi(priced(100, true), () => ({ order: { number: "EP-11" }, next: "redirect", redirectUrl: "https://gateway-int.cashflows.com/y" }));
     render(<CheckoutView buy="c1:10" walletPence={3005} minCardPence={100} />);
     await screen.findByTestId("pay");
     fireEvent.click(screen.getByText("Debit Or Credit Card"));
@@ -176,7 +176,7 @@ describe("checkout", () => {
     await waitFor(() => expect(window.location.assign).toHaveBeenCalledWith("https://gateway-int.cashflows.com/y"));
     expect(calls.find((c) => c.url.endsWith("/api/checkout"))!.body).toMatchObject({ payWith: "card", useWallet: false });
     // A "buy now" keeps its tickets aside too, so a failed card can put them in the basket.
-    expect(localStorage.getItem("gg-basket-v1:aside:GG-11")).toContain('"add"');
+    expect(localStorage.getItem("gg-basket-v1:aside:EP-11")).toContain('"add"');
   });
 
   it("splits wallet and card, and refuses a card part under the minimum", async () => {
@@ -193,11 +193,11 @@ describe("checkout", () => {
 
   it("puts the basket aside before leaving for the card page", async () => {
     localStorage.setItem("gg-basket-v1", JSON.stringify([{ competitionId: "c1", quantity: 40 }]));
-    stubApi(priced(1000, false), () => ({ order: { number: "GG-10" }, next: "redirect", redirectUrl: "https://gateway-int.cashflows.com/x" }));
+    stubApi(priced(1000, false), () => ({ order: { number: "EP-10" }, next: "redirect", redirectUrl: "https://gateway-int.cashflows.com/x" }));
     render(<CheckoutView buy={null} walletPence={0} minCardPence={100} />);
     fireEvent.click(await screen.findByTestId("pay"));
     await waitFor(() => expect(window.location.assign).toHaveBeenCalledWith("https://gateway-int.cashflows.com/x"));
-    expect(localStorage.getItem("gg-basket-v1:aside:GG-10")).toContain("c1");
+    expect(localStorage.getItem("gg-basket-v1:aside:EP-10")).toContain("c1");
   });
 
   it("won't pay while the server reports a problem with a line", async () => {

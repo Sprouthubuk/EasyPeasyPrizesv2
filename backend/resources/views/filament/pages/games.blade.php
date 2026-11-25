@@ -38,11 +38,11 @@
         .gg-game-name{font-weight:800;margin-bottom:.4rem}
         .gg-game-looks{display:flex;flex-wrap:wrap;gap:.35rem}
         .gg-look{display:inline-flex;align-items:center;min-height:2rem;padding:.25rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.18);font-size:.8rem;font-weight:700;background:transparent;color:inherit;text-decoration:none;cursor:pointer}
-        .gg-look:hover{border-color:#22E6FF}
-        .gg-look.is-on{background:#FF2DAA;border-color:#FF2DAA;color:#fff}
-        .gg-games-view{border:1px solid rgba(255,255,255,.1);border-radius:.75rem;overflow:hidden;background:#07050B}
+        .gg-look:hover{border-color:#3FD8FF}
+        .gg-look.is-on{background:#FF1E8C;border-color:#FF1E8C;color:#fff}
+        .gg-games-view{border:1px solid rgba(255,255,255,.1);border-radius:.75rem;overflow:hidden;background:#05060E}
         .gg-games-bar{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:space-between;padding:.6rem .75rem;border-bottom:1px solid rgba(255,255,255,.08)}
         .gg-games-actions{display:flex;gap:.4rem}
-        .gg-games-frame{display:block;width:100%;height:min(820px,80vh);border:0;background:#07050B}
+        .gg-games-frame{display:block;width:100%;height:min(820px,80vh);border:0;background:#05060E}
     </style>
 </x-filament-panels::page>

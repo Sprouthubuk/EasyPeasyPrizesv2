@@ -106,7 +106,7 @@ it("a new player and a regular player can buy, pay, play and recover from a fail
     await shot(p, "after-pay-click");
     if (/fake-pay/.test(p.url())) { await p.click("#pay"); await p.waitForLoadState("networkidle"); await shot(p, "after-card-paid"); }
     await p.waitForTimeout(1500);
-    expect(p.url()).toMatch(/\/order\/GG-/);
+    expect(p.url()).toMatch(/\/order\/EP-/);
     await shot(p, "order-page");
     const play = p.locator('[data-testid="play"]');
     expect(await play.count()).toBe(1);
@@ -148,15 +148,15 @@ it("a new player and a regular player can buy, pay, play and recover from a fail
     await q.waitForLoadState("networkidle");
     if (/fake-pay/.test(q.url())) { await q.click("#pay"); await q.waitForLoadState("networkidle"); }
     await q.waitForTimeout(1500);
-    expect(q.url()).toMatch(/\/order\/GG-/);
+    expect(q.url()).toMatch(/\/order\/EP-/);
     expect(await q.locator('[data-testid="draw-line"]').count()).toBe(1);
     await shot(q, "draw-order-page");
     await q.goto(site.origin + "/account/wallet");
     await shot(q, "wallet");
     await q.goto(site.origin + "/account");
     await shot(q, "account");
-    await q.goto(site.origin + "/gimme-box");
-    await shot(q, "gimme-box");
+    await q.goto(site.origin + "/lucky-dip");
+    await shot(q, "lucky-dip");
     // D — top up £5 by card, then a card that's declined, then one that's cancelled.
     await q.goto(site.origin + "/account/wallet");
     await q.locator('main button.gg-cta').first().click();

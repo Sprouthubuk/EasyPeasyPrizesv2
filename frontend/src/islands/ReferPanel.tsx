@@ -53,7 +53,7 @@ function VoucherCard({ v, onUsed }: { v: Voucher; onUsed: () => void }) {
   return (
     <div className="card card-cy card-p stack g12" data-testid="voucher">
       <div className="row between"><span className="d nc" style={{ fontSize: 24 }}>{v.tickets} Free Tickets</span><span className="hint">Use by {ukDate(v.expiresAt)}</span></div>
-      {done ? <div className="notice notice-c"><Svg name="check" size={18} /><span>Done! Your tickets are in. <a href={`/order/${done}`} style={{ color: "#22E6FF" }}>See your ticket numbers</a></span></div> : draws === null ? (
+      {done ? <div className="notice notice-c"><Svg name="check" size={18} /><span>Done! Your tickets are in. <a href={`/order/${done}`} style={{ color: "#3FD8FF" }}>See your ticket numbers</a></span></div> : draws === null ? (
         <button type="button" className="btn btn-c" onClick={open}>Choose A Draw</button>
       ) : draws.length === 0 ? (
         <p className="hint" style={{ margin: 0 }}>No live draw can take these tickets right now. Check back soon.</p>

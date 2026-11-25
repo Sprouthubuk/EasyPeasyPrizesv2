@@ -38,7 +38,7 @@ const winnersLoop = loopOf(winners, 8);
   {featured && (
     <section class="sec" style="padding-top:20px"><div class="wrap split hero-split">
       <div class="stack g16 hero-txt">
-        <div class="row g8 gg-rise gg-d2"><span class="gg-ping" style="width:8px;height:8px;border-radius:999px;background:#FF2DAA;box-shadow:0 0 10px #FF2DAA"></span><h1 class="eyebrow" style="color:#FF5CC0;margin:0">UK Prize Competitions · {opensLater ? `Coming soon · Opens ${ukDateTime(opensLater)}` : `Featured${prizesTotal ? ` · ${formatCount(prizesTotal)} instant wins` : ""}`}</h1></div>
+        <div class="row g8 gg-rise gg-d2"><span class="gg-ping" style="width:8px;height:8px;border-radius:999px;background:#FF1E8C;box-shadow:0 0 10px #FF1E8C"></span><h1 class="eyebrow" style="color:#FF6FD0;margin:0">UK Prize Competitions · {opensLater ? `Coming soon · Opens ${ukDateTime(opensLater)}` : `Featured${prizesTotal ? ` · ${formatCount(prizesTotal)} instant wins` : ""}`}</h1></div>
         <h2 class="h1 hero-title gg-rise gg-d2"><span class="np gg-flicker">{featured.title}</span></h2>
         <p class="p gg-rise gg-d3">{featured.subtitle ?? featured.description.slice(0, 120)}{featured.topPrizePence ? <> · Top prize <b class="ny">{formatPence(featured.topPrizePence, { short: false })}</b>.</> : null}</p>
         {opensLater && <div class="eyebrow gg-rise gg-d3" style="margin-bottom:-8px">Opens in</div>}
@@ -48,7 +48,7 @@ const winnersLoop = loopOf(winners, 8);
       </div>
       <HeroImage src={featured.image} srcset={featured.imageSrcset} alt={featured.title} float class="hero-top">
         {gameBadge(featured) && <span class="tag tag-y" style="position:absolute;top:14px;left:14px;background:rgba(7,5,11,.88)"><Icon name="bolt" size={11} stroke={3} /> {gameBadge(featured)}</span>}
-        {prizesTotal > 0 && <span class="gg-pop gg-d6" style="position:absolute;right:10px;bottom:14px;background:rgba(7,5,11,.9);border:1px solid #22E6FF;border-radius:14px;padding:8px 12px;box-shadow:0 0 20px rgba(34,230,255,.35)"><span class="eyebrow" style="display:block">Still to win</span><span class="d nc" style="font-size:22px">{formatCount(prizesLeft)} prizes</span></span>}
+        {prizesTotal > 0 && <span class="gg-pop gg-d6" style="position:absolute;right:10px;bottom:14px;background:rgba(7,5,11,.9);border:1px solid #3FD8FF;border-radius:14px;padding:8px 12px;box-shadow:0 0 20px rgba(63,216,255,.35)"><span class="eyebrow" style="display:block">Still to win</span><span class="d nc" style="font-size:22px">{formatCount(prizesLeft)} prizes</span></span>}
       </HeroImage>
     </div>
     {winners.length > 0 ? (
@@ -63,7 +63,7 @@ const winnersLoop = loopOf(winners, 8);
       </div></div>
     ) : ladder.length > 0 && (
       <div class="wrap" style="margin-top:24px"><div style="border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);padding:12px 0;overflow:hidden" aria-label="Prize ladder">
-        <div class="gg-marq" style={`animation-duration:${ladderLoop.length * 3.5}s`}>{[...ladderLoop, ...ladderLoop].map((p, i) => <span aria-hidden={i >= ladder.length ? "true" : undefined} style="white-space:nowrap;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800"><span class="d" style="color:#FF5CC0">{formatPence(p.valuePence)}</span> <span class="dim">×</span> {formatCount(p.quantity)}</span>)}</div>
+        <div class="gg-marq" style={`animation-duration:${ladderLoop.length * 3.5}s`}>{[...ladderLoop, ...ladderLoop].map((p, i) => <span aria-hidden={i >= ladder.length ? "true" : undefined} style="white-space:nowrap;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800"><span class="d" style="color:#FF6FD0">{formatPence(p.valuePence)}</span> <span class="dim">×</span> {formatCount(p.quantity)}</span>)}</div>
       </div></div>
     )}
     </section>
@@ -82,7 +82,7 @@ const winnersLoop = loopOf(winners, 8);
   )}
 
   {site.gimmeBox && (
-    <section id="gimme-box" class="sec"><div class="wrap stack g16">
+    <section id="lucky-dip" class="sec"><div class="wrap stack g16">
       <div class="stack g8">
         <h2 class="h2 gg-reveal sh">Lucky <span class="np">Dip</span></h2>
         <p class="p" style="margin:0">Can't decide? Set a budget and we'll pack a mix of live draw tickets for you{site.gimmeBox.bonusPct > 0 ? <>, plus <b class="ny">{site.gimmeBox.bonusPct}% bonus tickets</b> free</> : null}.</p>

@@ -71,7 +71,7 @@ final class Orders
             $this->check->assertAllowed($user, $cardPart);
 
             $order = Order::query()->create([
-                'number' => Order::newNumber('GG'), 'user_id' => $user->id, 'order_type' => 'tickets', 'status' => 'created',
+                'number' => Order::newNumber('EP'), 'user_id' => $user->id, 'order_type' => 'tickets', 'status' => 'created',
                 'total_pence' => $total, 'card_pence' => $cardPart, 'promo_code' => $priced['promo']['code'] ?? null,
                 'discount_pence' => $priced['promo']['discountPence'] ?? 0, 'request_id' => $requestId,
             ]);
@@ -105,7 +105,7 @@ final class Orders
     public function issueFree(User $user, Competition $c, int $tickets, string $source): Order
     {
         $order = Order::query()->create([
-            'number' => Order::newNumber('GG'), 'user_id' => $user->id, 'order_type' => 'tickets', 'status' => 'created',
+            'number' => Order::newNumber('EP'), 'user_id' => $user->id, 'order_type' => 'tickets', 'status' => 'created',
             'total_pence' => 0, 'card_pence' => 0, 'request_id' => $source.'-'.bin2hex(random_bytes(8)),
         ]);
         $order->lines()->create(['competition_id' => $c->id, 'quantity' => $tickets, 'unit_pence' => $c->price_pence, 'line_pence' => 0,
@@ -129,7 +129,7 @@ final class Orders
             $this->check->assertAllowed($user->refresh(), $amountPence);
 
             return Order::query()->create([
-                'number' => Order::newNumber('GD'), 'user_id' => $user->id, 'order_type' => 'deposit', 'status' => 'created',
+                'number' => Order::newNumber('ED'), 'user_id' => $user->id, 'order_type' => 'deposit', 'status' => 'created',
                 'total_pence' => $amountPence, 'card_pence' => $amountPence,
             ]);
         });

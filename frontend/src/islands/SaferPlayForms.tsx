@@ -54,7 +54,7 @@ export default function SaferPlayForms({ initial }: { initial: Limits }) {
           </div>
         </div>
       </div>
-      <div className="card card-p stack g12" style={{ borderColor: "rgba(255,45,170,.4)" }}>
+      <div className="card card-p stack g12" style={{ borderColor: "rgba(255,30,140,.4)" }}>
         <h2 className="h3">Self-Exclusion</h2>
         {limits.selfExcludedUntil ? <div className="notice notice-c"><span>Your account is closed to play until {ukDateTime(limits.selfExcludedUntil)}.</span></div> : !confirmExclude ? (
           <>

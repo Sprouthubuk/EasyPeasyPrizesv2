@@ -50,7 +50,7 @@ class WalletTest extends TestCase
         $this->topUp($u, 300);
         $this->topUp($u, 5000, 'bonus');
         $this->topUp($u, 5000, 'winnings');
-        $order = Order::query()->create(['number' => 'GG-TEST0001', 'user_id' => $u->id, 'order_type' => 'tickets', 'status' => 'created', 'total_pence' => 1000, 'card_pence' => 0]);
+        $order = Order::query()->create(['number' => 'EP-TEST0001', 'user_id' => $u->id, 'order_type' => 'tickets', 'status' => 'created', 'total_pence' => 1000, 'card_pence' => 0]);
         $this->wallet()->spendForOrder($order, 1000, 1000);
         $order->refresh();
         $this->assertSame([300, 500, 200], [$order->paid_deposit_pence, $order->paid_bonus_pence, $order->paid_winnings_pence]);
@@ -63,7 +63,7 @@ class WalletTest extends TestCase
         $u = $this->player();
         $this->topUp($u, 400);
         $this->topUp($u, 1000, 'bonus'); // only half a £10 basket can be bonus
-        $order = Order::query()->create(['number' => 'GG-TEST0002', 'user_id' => $u->id, 'order_type' => 'tickets', 'status' => 'created', 'total_pence' => 1000, 'card_pence' => 0]);
+        $order = Order::query()->create(['number' => 'EP-TEST0002', 'user_id' => $u->id, 'order_type' => 'tickets', 'status' => 'created', 'total_pence' => 1000, 'card_pence' => 0]);
         $this->expectException(RefusedException::class);
         try {
             $this->wallet()->spendForOrder($order, 1000, 1000);
@@ -77,7 +77,7 @@ class WalletTest extends TestCase
         $u = $this->player();
         $this->topUp($u, 300);
         $this->topUp($u, 500, 'winnings');
-        $order = Order::query()->create(['number' => 'GG-TEST0003', 'user_id' => $u->id, 'order_type' => 'tickets', 'status' => 'pending_payment', 'total_pence' => 800, 'card_pence' => 0]);
+        $order = Order::query()->create(['number' => 'EP-TEST0003', 'user_id' => $u->id, 'order_type' => 'tickets', 'status' => 'pending_payment', 'total_pence' => 800, 'card_pence' => 0]);
         $this->wallet()->spendForOrder($order, 800, 800);
         $this->wallet()->releaseOrder($order->refresh());
         $this->wallet()->releaseOrder($order);
