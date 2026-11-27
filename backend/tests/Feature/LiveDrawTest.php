@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Pages\LiveDraw;
 use App\Filament\Resources\Competitions\Pages\ListCompetitions;
 use App\Models\User;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Facades\Filament;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -73,5 +75,19 @@ class LiveDrawTest extends TestCase
         Livewire::test(ListCompetitions::class)
             ->assertTableActionVisible('liveDraw', $draw)->assertTableActionHasUrl('liveDraw', '/live-draw/echo-flash', $draw)
             ->assertTableActionHidden('liveDraw', $draft)->assertTableActionHidden('liveDraw', $instant);
+    }
+    public function test_the_live_draw_page_lists_only_published_draws_to_pick_from(): void
+    {
+        $a = $this->admin();
+        $a->saveAppAuthenticationSecret(app(AppAuthentication::class)->generateSecret()); // two-step sign-in set up
+        $this->actingAs($a->refresh(), 'web');
+        Filament::setCurrentPanel('admin');
+        $draw = $this->competition('draw', ['slug' => 'echo-flash', 'title' => 'Echo Flash']);
+        $draft = $this->competition('draw', ['slug' => 'draft-draw', 'title' => 'Draft Draw'], [], false);
+        $instant = $this->competition('instant', ['title' => 'Instant Only']);
+        $this->get('/admin/live-draw')->assertOk()->assertSee('Live Draw');
+        Livewire::test(LiveDraw::class)
+            ->assertCanSeeTableRecords([$draw])->assertCanNotSeeTableRecords([$draft, $instant])
+            ->assertTableActionHasUrl('liveDraw', '/live-draw/echo-flash', $draw);
     }
 }
