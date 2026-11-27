@@ -101,7 +101,7 @@ export default function OrderView({ number, initial }: { number: string; initial
   return (
     <div className="stack g16">
       <div className="stack g8 gg-rise" style={{ textAlign: "center", alignItems: "center" }}>
-        <span className="gg-pop" style={{ width: 64, height: 64, borderRadius: 999, border: "1px solid #22E6FF", color: "#22E6FF", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 30px rgba(34,230,255,.45)" }}><Svg name="check" size={32} stroke={2.6} /></span>
+        <span className="gg-pop" style={{ width: 64, height: 64, borderRadius: 999, border: "1px solid #3FD8FF", color: "#3FD8FF", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 30px rgba(63,216,255,.45)" }}><Svg name="check" size={32} stroke={2.6} /></span>
         <h1 className="h1">You’re <span className="np gg-flicker">In!</span></h1>
         <p className="p">Payment confirmed · {order.lines.reduce((n, l) => n + l.quantity, 0)} tickets · {formatMoney(order.totalPence)}</p>
       </div>

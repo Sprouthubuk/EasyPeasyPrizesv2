@@ -128,7 +128,7 @@ img { max-width: 100%; }
 .panel-item { padding: 0; }
 .panel-item p:last-of-type { margin-bottom: 0; padding-bottom: 0; }
 
-/* Gimme Gimme blocks: tickets and summary rows */
+/* Easy Peasy blocks: tickets and summary rows */
 
 .gg-tickets { background-color: #1a1322; border-left: 4px solid #FF1E8C; border-radius: 12px; margin: 0 0 14px; width: 100%; }
 .gg-tickets td { padding: 16px 18px; }

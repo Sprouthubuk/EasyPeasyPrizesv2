@@ -15,9 +15,9 @@ class CashflowsHttpTest extends TestCase
         $gw = new CashflowsGateway('https://gateway-int.cashflows.com', 'CONF-1', 'api-secret');
         Http::fake([
             'gateway-int.cashflows.com/api/gateway/payment-jobs' => Http::response(['data' => ['reference' => 'JOB-77'], 'links' => ['action' => ['url' => 'https://gateway-int.cashflows.com/pay/JOB-77']]]),
-            'gateway-int.cashflows.com/api/gateway/payment-jobs/JOB-77' => Http::response(['data' => ['reference' => 'JOB-77', 'status' => 'Paid', 'order' => ['orderNumber' => 'GG-X1234567'], 'amountToCollect' => '4.00']]),
+            'gateway-int.cashflows.com/api/gateway/payment-jobs/JOB-77' => Http::response(['data' => ['reference' => 'JOB-77', 'status' => 'Paid', 'order' => ['orderNumber' => 'EP-X1234567'], 'amountToCollect' => '4.00']]),
         ]);
-        $order = new Order(['number' => 'GG-X1234567', 'card_pence' => 400]);
+        $order = new Order(['number' => 'EP-X1234567', 'card_pence' => 400]);
         $job = $gw->createPaymentJob($order, 'p@example.com', ['success' => 'https://s/ok', 'failed' => 'https://s/f', 'cancelled' => 'https://s/c']);
         $this->assertSame(['reference' => 'JOB-77', 'redirectUrl' => 'https://gateway-int.cashflows.com/pay/JOB-77'], $job);
 
@@ -31,12 +31,12 @@ class CashflowsHttpTest extends TestCase
             return $r->header('ConfigurationId')[0] === 'CONF-1'
                 && $r->header('Hash')[0] === hash('sha512', 'api-secret'.$body)
                 && $data['amountToCollect'] === '4.00' && $data['currency'] === 'GBP'
-                && $data['order']['orderNumber'] === 'GG-X1234567'
+                && $data['order']['orderNumber'] === 'EP-X1234567'
                 && $data['parameters']['returnUrlCancelled'] === 'https://s/c';
         });
 
         $answer = $gw->lookup('JOB-77');
-        $this->assertNull($answer->matches('JOB-77', 'GG-X1234567', 400));
+        $this->assertNull($answer->matches('JOB-77', 'EP-X1234567', 400));
         Http::assertSent(fn (Request $r) => $r->method() === 'GET' && $r->header('Hash')[0] === hash('sha512', 'api-secret'));
     }
 
@@ -53,6 +53,6 @@ class CashflowsHttpTest extends TestCase
         Http::fake(['*' => Http::response(['errors' => ['bad']], 400)]);
         $gw = new CashflowsGateway('https://gateway-int.cashflows.com', 'CONF-1', 'k');
         $this->expectException(\RuntimeException::class);
-        $gw->createPaymentJob(new Order(['number' => 'GG-1', 'card_pence' => 100]), 'a@b.c', ['success' => 'x', 'failed' => 'y', 'cancelled' => 'z']);
+        $gw->createPaymentJob(new Order(['number' => 'EP-1', 'card_pence' => 100]), 'a@b.c', ['success' => 'x', 'failed' => 'y', 'cancelled' => 'z']);
     }
 }

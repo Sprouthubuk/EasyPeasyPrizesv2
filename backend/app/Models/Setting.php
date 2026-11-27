@@ -25,8 +25,10 @@ class Setting extends Model
         'max_top_up_pence' => '50000',
         'bonus_expiry_days' => '30',
         'featured_slug' => null,
-        'instagram_url' => null,
-        'facebook_url' => null,
+        'instagram_url' => 'https://www.instagram.com/easypeasyprizes/',
+        'facebook_url' => 'https://www.facebook.com/groups/epfangroup',
+        'youtube_url' => 'https://www.youtube.com/@easypeasyprizes',
+        'tiktok_url' => 'https://www.tiktok.com/@easypeasyprizes',
         'support_email' => null,
         // Admin reports: a win at or above this sends an alert (Reports::bigWinPence); blank addresses = the usual alert addresses.
         'big_win_alert_pence' => '10000',

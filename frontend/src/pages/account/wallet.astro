@@ -10,7 +10,7 @@ let m = me!;
 // Back from the card page after a top up: ask the server to check the payment, then show the new balance.
 let deposit = Astro.url.searchParams.get("deposit");
 let paidTopUp: { number: string; valuePence: number } | null = null;
-if (deposit && /^GD-[A-Z0-9]{4,16}$/.test(deposit)) {
+if (deposit && /^ED-[A-Z0-9]{4,16}$/.test(deposit)) {
   const order = await api.post<OrderView>(`/api/orders/${deposit}/return`).catch(() => null);
   if (order?.status === "paid") paidTopUp = { number: order.number, valuePence: order.trackValuePence };
   deposit = order?.status === "paid" ? "paid" : order && ["failed", "cancelled", "expired"].includes(order.status) ? "failed" : "pending";

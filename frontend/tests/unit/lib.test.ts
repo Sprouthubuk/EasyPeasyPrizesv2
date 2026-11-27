@@ -86,9 +86,9 @@ describe("basket", () => {
   it("a 'buy now' card payment that fails puts its tickets in the basket, keeping what was already there", () => {
     // Bug: "Enter Now" skips the basket, so after a declined card "Try Again" opened an empty basket.
     addToBasket("other", 2);
-    setAside("GG-9", [{ competitionId: "x", quantity: 0, bundleId: 3 }]);
+    setAside("EP-9", [{ competitionId: "x", quantity: 0, bundleId: 3 }]);
     expect(readBasket()).toEqual([{ competitionId: "other", quantity: 2 }]);
-    expect(restoreAside("GG-9")).toBe(true);
+    expect(restoreAside("EP-9")).toBe(true);
     expect(readBasket()).toEqual([{ competitionId: "other", quantity: 2 }, { competitionId: "x", quantity: 0, bundleId: 3 }]);
   });
 
@@ -118,11 +118,11 @@ describe("basket", () => {
 
   it("puts the basket aside for a card payment and restores it once", () => {
     addToBasket("a", 4);
-    setAside("GG-1");
+    setAside("EP-1");
     clearBasket();
-    expect(restoreAside("GG-1")).toBe(true);
+    expect(restoreAside("EP-1")).toBe(true);
     expect(readBasket()).toEqual([{ competitionId: "a", quantity: 4 }]);
-    expect(restoreAside("GG-1")).toBe(false);
+    expect(restoreAside("EP-1")).toBe(false);
   });
 });
 

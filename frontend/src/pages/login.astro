@@ -10,6 +10,6 @@ if (Astro.locals.me) return Astro.redirect(safeNext(next, "/account"));
     <div class="gg-rise"><h1 class="h1 h1-one">Welcome <span class="nc gg-flicker">Back</span></h1><p class="p" style="margin-top:6px">Log in to play and check your wins.</p></div>
     <div class="gg-rise gg-d2"><LoginForm client:load next={next} /></div>
     <p class="p" style="text-align:center">New here? <a href={`/join${next ? `?next=${encodeURIComponent(next)}` : ""}`}><b>Create an account</b></a></p>
-    <p class="hint" style="text-align:center;margin:0">Moved from our old site? Log in with the same email and password.</p>
+    <p class="hint" style="text-align:center;margin:0">Used our old site? Log in with the same email address, or use Forgot Password to set a new password.</p>
   </div></section>
 </Layout>

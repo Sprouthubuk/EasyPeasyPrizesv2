@@ -143,7 +143,7 @@ export function ForgotForm() {
       setBusy(false);
     }
   }
-  if (sent) return <div className="notice notice-c gg-pop" role="status"><Svg name="mail" size={18} /><span>If there’s an account for that email, a reset link is on its way. It works for 60 minutes. Not there? Check spam or <button type="button" onClick={() => setSent(false)} style={{ background: "none", border: 0, padding: 0, color: "#22E6FF", font: "inherit", textDecoration: "underline", cursor: "pointer" }}>try again</button>.</span></div>;
+  if (sent) return <div className="notice notice-c gg-pop" role="status"><Svg name="mail" size={18} /><span>If there’s an account for that email, a reset link is on its way. It works for 60 minutes. Not there? Check spam or <button type="button" onClick={() => setSent(false)} style={{ background: "none", border: 0, padding: 0, color: "#3FD8FF", font: "inherit", textDecoration: "underline", cursor: "pointer" }}>try again</button>.</span></div>;
   return (
     <form className="stack g12" onSubmit={submit}>
       <div className="field"><label htmlFor="em">Email</label><input className="inp" id="em" type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>

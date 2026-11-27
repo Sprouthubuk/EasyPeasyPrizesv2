@@ -30,14 +30,14 @@ const prize = (w: ArchiveWinnerRow) => (w.prizeName.startsWith("£") || /\d/.tes
 
     {drawWinners.length > 0 && <div class="stack g8"><h2 class="h3">{drawWinners.length > 1 ? "Winners" : "Winner"}</h2>{drawWinners.map((w) => (
       <div class="card card-ye card-p stack g8">
-        <div class="row g12"><span class="av" style="width:48px;height:48px;background:#FF2DAA;font-size:20px">{w.name.slice(0, 1)}</span><div style="flex:1"><div class="d" style="font-size:20px">{w.name}</div><div class="hint">{w.town ? `${w.town} · ` : ""}{w.at ? ukDateTime(w.at) : ""}</div></div><span class="tag tag-y">Winner</span></div>
+        <div class="row g12"><span class="av" style="width:48px;height:48px;background:#FF1E8C;font-size:20px">{w.name.slice(0, 1)}</span><div style="flex:1"><div class="d" style="font-size:20px">{w.name}</div><div class="hint">{w.town ? `${w.town} · ` : ""}{w.at ? ukDateTime(w.at) : ""}</div></div><span class="tag tag-y">Winner</span></div>
         <div class="d ny" style="font-size:22px">{w.prizeName}</div>
         {w.ticketNumber && <div class="hint">Winning ticket #{w.ticketNumber}</div>}
       </div>
     ))}</div>}
 
     {hasInstantWins && <div class="stack g8"><h2 class="h3">Instant Winners</h2>
-      <div class="card" style="overflow:hidden">{wins.data.map((w) => <div class="feed"><span class="av" style="background:#FF2DAA">{w.name.slice(0, 1)}</span><div style="flex:1;min-width:0"><div style="font-weight:800"><b>{w.name}</b> won <span class="ny">{prize(w)}</span></div><div class="hint">{w.ticketNumber ? `Ticket #${w.ticketNumber}` : ""}{w.at ? ` · ${ukDateTime(w.at)}` : ""}</div></div></div>)}</div>
+      <div class="card" style="overflow:hidden">{wins.data.map((w) => <div class="feed"><span class="av" style="background:#FF1E8C">{w.name.slice(0, 1)}</span><div style="flex:1;min-width:0"><div style="font-weight:800"><b>{w.name}</b> won <span class="ny">{prize(w)}</span></div><div class="hint">{w.ticketNumber ? `Ticket #${w.ticketNumber}` : ""}{w.at ? ` · ${ukDateTime(w.at)}` : ""}</div></div></div>)}</div>
       <div class="row g8" style="justify-content:center">{wpage > 1 && <a class="btn btn-o btn-sm" href={link({ wins: wpage - 1 })}>Newer</a>}{wins.hasMore && <a class="btn btn-o btn-sm" href={link({ wins: wpage + 1 })}>Older</a>}</div>
     </div>}
 

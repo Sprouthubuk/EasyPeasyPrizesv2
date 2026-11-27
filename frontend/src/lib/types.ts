@@ -117,7 +117,7 @@ export interface SiteInfo {
   minWithdrawalPence: Pence;
   maxTopUpPence: Pence;
   featuredSlug: string | null;
-  socials: { instagram: string | null; facebook: string | null };
+  socials: { instagram: string | null; facebook: string | null; youtube: string | null; tiktok: string | null };
   supportEmail: string | null;
   /** Meta Pixel ID from the admin; null when none is set (then nothing from Meta ever loads). */
   metaPixelId: string | null;

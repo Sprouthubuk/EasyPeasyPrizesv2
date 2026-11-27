@@ -25,7 +25,7 @@ class TestEmail extends Notification
             ->line('This is a test from the Easy Peasy admin. If you can read it, emails are being sent. Below is an example of how ticket numbers and totals look in an order email. It isn’t a real order.')
             ->markdown('notifications::email', ['blocks' => [
                 ['tickets', 'Example Competition', '6 tickets · 3 paid + 3 free', [104, 377, 1208, 2045, 2911, 3650]],
-                ['rows', [['Order', 'GG-EXAMPLE'], ['From your wallet', '£1.00'], ['By card', '£0.77']], 'Total', '£1.77'],
+                ['rows', [['Order', 'EP-EXAMPLE'], ['From your wallet', '£1.00'], ['By card', '£0.77']], 'Total', '£1.77'],
             ]])
             ->action('Visit Easy Peasy', $site)
             ->line('18+ UK only. Please play responsibly.')

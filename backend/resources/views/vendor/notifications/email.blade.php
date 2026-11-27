@@ -1,5 +1,5 @@
 {{--
-  Every notification email (Laravel's template, in Gimme Gimme's words and design). A notification can add
+  Every notification email (Laravel's template, in Easy Peasy Prizes words and design). A notification can add
   blocks with ->markdown('notifications::email', ['blocks' => [...]]): ['tickets', title, sub, numbers] or
   ['rows', [[label, value], ...], totalLabel?, totalValue?]. They sit between the intro and the button.
 --}}
@@ -44,7 +44,7 @@
 @if (! empty($salutation))
 {{ $salutation }}
 @else
-The Gimme Gimme team
+The Easy Peasy Prizes team
 @endif
 
 {{-- Subcopy --}}

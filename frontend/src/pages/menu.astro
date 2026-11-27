@@ -13,7 +13,7 @@ const back = ref && new URL(ref).host === Astro.url.host ? new URL(ref).pathname
     <h1 class="sr-only">Menu</h1>
     {me ? (
       <>
-        <a href="/account" class="card card-ye card-p row g12 gg-rise" style="text-decoration:none;color:#fff"><span class="av" style="border:1px solid #FF2DAA;color:#FF5CC0">{me.firstName.slice(0, 1)}</span><span style="flex:1"><b class="d" style="font-size:18px;display:block">{me.firstName} {me.lastName}</b><span class="hint">View account</span></span><span class="d ny" style="font-size:24px">{formatMoney(me.wallet.totalPence)}</span></a>
+        <a href="/account" class="card card-ye card-p row g12 gg-rise" style="text-decoration:none;color:#fff"><span class="av" style="border:1px solid #FF1E8C;color:#FF6FD0">{me.firstName.slice(0, 1)}</span><span style="flex:1"><b class="d" style="font-size:18px;display:block">{me.firstName} {me.lastName}</b><span class="hint">View account</span></span><span class="d ny" style="font-size:24px">{formatMoney(me.wallet.totalPence)}</span></a>
         <div class="r2 gg-rise gg-d1"><a class="btn btn-y gg-cta" href="/account/wallet#top-up">Top Up</a><a class="btn btn-o" href="/account/tickets">My Tickets</a></div>
       </>
     ) : <div class="r2 gg-rise"><a class="btn btn-y gg-cta" href="/join">Join</a><a class="btn btn-o" href="/login">Log In</a></div>}

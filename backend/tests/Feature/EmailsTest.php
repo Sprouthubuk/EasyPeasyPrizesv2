@@ -92,16 +92,16 @@ class EmailsTest extends TestCase
         $u = $this->player(['first_name' => 'Sam']);
         $c = new Competition(['title' => 'Win <b>£500</b> & More', 'type' => 'draw', 'prize_name' => '£500 <i>Cash</i>']);
 
-        $deposit = new Order(['number' => 'GD-1001', 'order_type' => 'deposit', 'total_pence' => 1500]);
+        $deposit = new Order(['number' => 'ED-1001', 'order_type' => 'deposit', 'total_pence' => 1500]);
         [$m, $html] = $this->render(new OrderReceipt($deposit->setRelation('lines', collect())), $u);
-        $this->assertSame('Top Up Received · GD-1001', $m->subject);
+        $this->assertSame('Top Up Received · ED-1001', $m->subject);
         $this->assertStringContainsString('£15.00', $html);
         $this->assertBranded($html);
 
         $line = (new OrderLine(['tickets' => [7, 42]]))->setRelation('competition', $c);
-        $order = (new Order(['number' => 'GG-2002', 'order_type' => 'tickets', 'total_pence' => 200, 'wallet_pence' => 200, 'card_pence' => 0]))->setRelation('lines', collect([$line]));
+        $order = (new Order(['number' => 'EP-2002', 'order_type' => 'tickets', 'total_pence' => 200, 'wallet_pence' => 200, 'card_pence' => 0]))->setRelation('lines', collect([$line]));
         [$m, $html] = $this->render(new OrderReceipt($order), $u);
-        $this->assertSame('You’re In! Order GG-2002', $m->subject);
+        $this->assertSame('You’re In! Order EP-2002', $m->subject);
         $this->assertTitleCase($m->subject);
         $this->assertStringContainsString('>#7</span>', $html);
         $this->assertStringContainsString('>#42</span>', $html);
@@ -122,7 +122,7 @@ class EmailsTest extends TestCase
         $c = new Competition(['title' => 'Meta Quest 3S 128GB', 'type' => 'draw']);
         $bundle = (new OrderLine(['tickets' => range(101, 128), 'paid_quantity' => 10, 'free_quantity' => 15, 'bonus_quantity' => 3, 'source' => 'gimme_box']))->setRelation('competition', $c);
         $many = (new OrderLine(['tickets' => range(1, 75), 'paid_quantity' => 75]))->setRelation('competition', new Competition(['title' => 'Ninja Crispi', 'type' => 'draw']));
-        $order = (new Order(['number' => 'GG-3003', 'order_type' => 'tickets', 'total_pence' => 1940, 'wallet_pence' => 440, 'card_pence' => 1500]))->setRelation('lines', collect([$bundle, $many]));
+        $order = (new Order(['number' => 'EP-3003', 'order_type' => 'tickets', 'total_pence' => 1940, 'wallet_pence' => 440, 'card_pence' => 1500]))->setRelation('lines', collect([$bundle, $many]));
         [, $html] = $this->render(new OrderReceipt($order), $u);
         $this->assertStringContainsString('28 tickets · 10 paid + 15 free + 3 Lucky Dip bonus', $html);
         $this->assertStringContainsString('and 15 more in My Tickets', $html);
@@ -131,7 +131,7 @@ class EmailsTest extends TestCase
         $this->assertBranded($html);
 
         $voucher = (new OrderLine(['tickets' => range(301, 310), 'paid_quantity' => 0, 'source' => 'voucher']))->setRelation('competition', $c);
-        $free = (new Order(['number' => 'GG-3004', 'order_type' => 'tickets', 'total_pence' => 0, 'wallet_pence' => 0, 'card_pence' => 0]))->setRelation('lines', collect([$voucher]));
+        $free = (new Order(['number' => 'EP-3004', 'order_type' => 'tickets', 'total_pence' => 0, 'wallet_pence' => 0, 'card_pence' => 0]))->setRelation('lines', collect([$voucher]));
         [, $html] = $this->render(new OrderReceipt($free), $u);
         $this->assertStringContainsString('free from your voucher', $html);
         $this->assertStringContainsString('Free', $html);
@@ -145,7 +145,7 @@ class EmailsTest extends TestCase
         $emails = [
             new PrizeWon((new PrizeClaim)->forceFill(['prize_name' => '£500 Cash', 'value_pence' => 50000, 'status' => 'fulfilled'])->setRelation('competition', $c)),
             new WithdrawalUpdate((new Withdrawal)->forceFill(['amount_pence' => 2500, 'status' => 'pending'])),
-            new WithdrawalUpdate((new Withdrawal)->forceFill(['amount_pence' => 2500, 'status' => 'paid', 'note' => 'GG-W-1042'])),
+            new WithdrawalUpdate((new Withdrawal)->forceFill(['amount_pence' => 2500, 'status' => 'paid', 'note' => 'EP-W-1042'])),
             new WithdrawalUpdate((new Withdrawal)->forceFill(['amount_pence' => 2500, 'status' => 'rejected', 'note' => 'The name on the account didn’t match yours.'])),
             new IdCheckResult((new IdCheck)->forceFill(['status' => 'approved'])),
             new IdCheckResult((new IdCheck)->forceFill(['status' => 'rejected', 'note' => 'The photo was too blurry to read.'])),
@@ -159,7 +159,7 @@ class EmailsTest extends TestCase
             $this->assertStringContainsString('Sam', $html);
         }
         [, $html] = $this->render($emails[2], $u);
-        $this->assertStringContainsString('GG-W-1042', $html);
+        $this->assertStringContainsString('EP-W-1042', $html);
         [, $html] = $this->render(new WithdrawalUpdate((new Withdrawal)->forceFill(['amount_pence' => 2500, 'status' => 'paid', 'note' => ''])), $u);
         $this->assertStringNotContainsString('Reference', $html, 'no empty reference line');
     }
@@ -175,8 +175,8 @@ class EmailsTest extends TestCase
 
     public function test_the_admin_alert_uses_the_same_design(): void
     {
-        [$m, $html] = $this->render(new AdminAlert('Order GG-9 needs attention', ['A paid order could not get all its tickets.'], '/admin/orders'), new \Illuminate\Notifications\AnonymousNotifiable);
-        $this->assertSame('[Easy Peasy Admin] Order GG-9 needs attention', $m->subject);
+        [$m, $html] = $this->render(new AdminAlert('Order EP-9 needs attention', ['A paid order could not get all its tickets.'], '/admin/orders'), new \Illuminate\Notifications\AnonymousNotifiable);
+        $this->assertSame('[Easy Peasy Admin] Order EP-9 needs attention', $m->subject);
         $this->assertStringContainsStringIgnoringCase('#05060e', $html);
         $this->assertStringContainsStringIgnoringCase('background-color: #ff1e8c', $html);
     }

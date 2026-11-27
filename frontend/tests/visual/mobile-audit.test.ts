@@ -82,7 +82,7 @@ let site: Awaited<ReturnType<typeof startSite>>;
 let b: Awaited<ReturnType<typeof chromium.launch>>;
 const seen = new Set<string>();
 // The 404 page answers 404 on purpose; an unknown order on the payment pages is refused on purpose.
-const expected = (f: Finding) => (f.page === "/this-page-does-not-exist" && /404/.test(f.kind + f.detail)) || (f.page.includes("GG-NOPE") && /40[34]/.test(f.kind + f.detail));
+const expected = (f: Finding) => (f.page === "/this-page-does-not-exist" && /404/.test(f.kind + f.detail)) || (f.page.includes("EP-NOPE") && /40[34]/.test(f.kind + f.detail));
 const problems = (widths: number[]) => [...new Set(findings.filter((f) => widths.includes(f.width) && !expected(f)).map((f) => `${f.who} ${f.width}px ${f.page}: ${f.kind} ${f.detail}`))];
 
 beforeAll(async () => {
@@ -99,7 +99,7 @@ afterAll(async () => {
 });
 
 it("every page works and fits a phone", async () => {
-  const queue = ["/", "/menu", "/this-page-does-not-exist", "/gimme-box", "/instant-winners", "/entry-lists", "/verify-email", "/forgot-password", "/reset-password?token=x&email=a@b.c", "/checkout", "/basket"];
+  const queue = ["/", "/menu", "/this-page-does-not-exist", "/lucky-dip", "/instant-winners", "/entry-lists", "/verify-email", "/forgot-password", "/reset-password?token=x&email=a@b.c", "/checkout", "/basket"];
   const skip = (u: string) => /^\/(api|admin|logout|sanctum|r\/)/.test(u) || /\.(xml|txt|png|webp|jpg|pdf)$/.test(u) || u.includes("#");
   const norm = (u: string) => u.split("#")[0];
   const anon = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
@@ -121,7 +121,7 @@ it("every page works and fits a phone", async () => {
   await lp.locator('[data-testid="login-form"] button[type="submit"]').click();
   await lp.waitForURL((u) => !u.pathname.startsWith("/login"));
   await lp.close();
-  const mem = ["/account", "/account/tickets", "/account/wallet", "/account/settings", "/account/safer-play", "/account/refer", "/", "/competitions", "/competitions/lush-snow-fairy-wonderland", "/competitions/cash-bang", "/basket", "/checkout", "/gimme-box", "/payment/failed?order=GG-NOPE", "/payment/cancelled?order=GG-NOPE"];
+  const mem = ["/account", "/account/tickets", "/account/wallet", "/account/settings", "/account/safer-play", "/account/refer", "/", "/competitions", "/competitions/lush-snow-fairy-wonderland", "/competitions/cash-bang", "/basket", "/checkout", "/lucky-dip", "/payment/failed?order=EP-NOPE", "/payment/cancelled?order=EP-NOPE"];
   for (const u of mem) await audit(member, site.origin, u, 390, "player");
   await member.close();
   expect(seen.size, "pages crawled").toBeGreaterThan(40);

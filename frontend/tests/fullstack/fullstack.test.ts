@@ -111,7 +111,7 @@ describe("buying and playing", () => {
     expect(co.status).toBe(201);
     expect(co.body.next).toBe("play");
     const n = co.body.order.number;
-    expect(n).toMatch(/^GG-[A-Z0-9]{8}$/);
+    expect(n).toMatch(/^EP-[A-Z0-9]{8}$/);
     const page = text((await b.page(`/order/${n}`)).html);
     expect(page).toContain("Play My 10 Games");
     const play = await b.api(`/api/orders/${n}/play`, {});
@@ -177,7 +177,7 @@ describe("buying and playing", () => {
     expect(d.status).toBe(201);
     const back = await fetch(site.origin + new URL(d.body.redirectUrl).pathname + "/paid", { redirect: "manual" });
     const to = new URL(back.headers.get("location")!);
-    expect(to.pathname + to.search).toMatch(/^\/account\/wallet\?deposit=GD-[A-Z0-9]{8}$/);
+    expect(to.pathname + to.search).toMatch(/^\/account\/wallet\?deposit=ED-[A-Z0-9]{8}$/);
     const page = await b.page(to.pathname + to.search);
     expect(text(page.html)).toContain("Top up received");
     expect((await b.api("/api/me")).body.wallet.depositPence).toBe(before + 1000);
@@ -199,7 +199,7 @@ describe("Lucky Dip and Refer a Friend start switched off", () => {
     const s = (await b.api("/api/site")).body;
     expect(s.gimmeBox).toBeNull();
     expect(s.referrals).toBeNull();
-    expect((await b.page("/gimme-box")).res.status).toBe(404);
+    expect((await b.page("/lucky-dip")).res.status).toBe(404);
     expect((await b.page("/")).html).not.toContain('data-testid="gimme-box"');
     expect((await b.api("/api/gimme-box", { budgetPence: 1000, mode: "surprise" })).status).toBe(404);
     expect((await b.get("/r/ABCDEFGH")).headers.get("location")).toBe("/join");
