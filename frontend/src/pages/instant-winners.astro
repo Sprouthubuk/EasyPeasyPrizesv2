@@ -9,7 +9,11 @@ const game = Astro.url.searchParams.get("game");
 const page = Math.max(1, Number(Astro.url.searchParams.get("page") ?? 1) || 1);
 const q = new URLSearchParams({ limit: "30", page: String(page) });
 if (game) q.set("game", game);
-const { data: rows, hasMore } = await Astro.locals.api.get<{ data: InstantWinnerRow[]; hasMore: boolean }>(`/api/winners/instant?${q}`);
+const [{ data: rows, hasMore }, archive] = await Promise.all([
+  Astro.locals.api.get<{ data: InstantWinnerRow[]; hasMore: boolean }>(`/api/winners/instant?${q}`),
+  // The old-site archive is dormant on Easy Peasy (starting fresh): only link to it when something was loaded into it.
+  Astro.locals.api.get<{ data: unknown[] }>("/api/archive").then((r) => r.data.length > 0).catch(() => false),
+]);
 const games = REVEAL_GAME_OPTIONS.filter((g) => g.id !== "classic");
 ---
 <Layout title="Instant Win Winners" active="instant-winners" description="Every instant win from the last 30 days on Easy Peasy Prizes: who won, what they won and the competition they won it in.">
@@ -25,6 +29,6 @@ const games = REVEAL_GAME_OPTIONS.filter((g) => g.id !== "classic");
       <div class="ep-feed"><span class="ep-feed-ico"><Icon name="bolt" size={18} /></span><div style="flex:1;min-width:0"><div class="ep-feed-t"><b>{w.name}</b> won <span class="pk">{w.prizeName.startsWith("£") || /\d/.test(w.prizeName) ? w.prizeName : formatPence(w.valuePence)}</span></div><div class="hint" style="font-size:12px">{w.gameLabel ? `${w.gameLabel} · ` : ""}{w.competitionTitle}</div></div><span class="hint" style="white-space:nowrap">{ago(w.at)}</span></div>
     )) : <div class="card empty">No instant wins yet{game ? " on this game" : ""}. The first winners are coming soon.</div>}
     <div class="row g8" style="justify-content:center">{page > 1 && <a class="btn btn-o" href={`/instant-winners?${new URLSearchParams({ ...(game ? { game } : {}), page: String(page - 1) })}`}>Newer</a>}{hasMore && <a class="btn btn-o" href={`/instant-winners?${new URLSearchParams({ ...(game ? { game } : {}), page: String(page + 1) })}`}>Load More</a>}</div>
-    <a class="tap" style="align-self:center" href="/previous">Instant winners from our previous site</a>
+    {archive && <a class="tap" style="align-self:center" href="/previous">Instant winners from our previous site</a>}
   </div></section>
 </Layout>

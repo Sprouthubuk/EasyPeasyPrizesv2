@@ -4,6 +4,8 @@ import Icon from "../../components/Icon.astro";
 import type { ArchiveCompetitionSummary } from "../../lib/types";
 import { ukDate } from "../../lib/time";
 const { data } = await Astro.locals.api.get<{ data: ArchiveCompetitionSummary[] }>("/api/archive");
+// Easy Peasy starts fresh and loads nothing into the archive: no page until something is in it.
+if (!data.length) return Astro.rewrite("/404");
 ---
 <Layout title="Previous Competitions" active="winners" description="Competitions from our previous site: every winner, the ticket that won and the full entry list, kept so you can still look them up.">
   <section class="sec" style="padding-top:20px"><div class="mid stack g16">

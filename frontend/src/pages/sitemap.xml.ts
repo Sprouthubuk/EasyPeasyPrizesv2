@@ -8,7 +8,7 @@ import type { CompetitionSummary } from "../lib/types";
  */
 const FIXED = [
   "/", "/competitions", "/competitions?type=instant", "/competitions?type=draw",
-  "/how-it-works", "/about", "/faq", "/free-entry", "/winners", "/instant-winners", "/entry-lists", "/previous", "/contact",
+  "/how-it-works", "/about", "/faq", "/free-entry", "/winners", "/instant-winners", "/entry-lists", "/contact",
   "/legal/terms", "/legal/free-entry", "/legal/privacy", "/legal/cookies", "/legal/complaints",
 ];
 
