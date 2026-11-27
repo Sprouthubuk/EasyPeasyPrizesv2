@@ -38,7 +38,7 @@ class SiteSettings extends Page
     private const MONEY = ['min_deposit_pence' => 'Minimum top up', 'min_card_pence' => 'Minimum card payment', 'min_withdrawal_pence' => 'Minimum withdrawal',
         'max_top_up_pence' => 'Largest top up'];
 
-    private const TEXT = ['featured_slug', 'instagram_url', 'facebook_url', 'support_email', 'bonus_expiry_days', 'meta_pixel_id', 'meta_test_event_code',
+    private const TEXT = ['featured_slug', 'instagram_url', 'facebook_url', 'youtube_url', 'tiktok_url', 'support_email', 'bonus_expiry_days', 'meta_pixel_id', 'meta_test_event_code',
         'gimme_box_chips', 'gimme_box_min_pence', 'gimme_box_max_pence', 'gimme_box_bonus_pct', 'gimme_box_max_sold_pct', 'gimme_box_slow_boost_pct',
         'gimme_box_hold_minutes', 'gimme_box_share_of_sales_pct',
         'referral_reward_type', 'referral_reward_tickets', 'referral_reward_credit_pence', 'referral_min_purchase_pence', 'referral_monthly_cap',
@@ -87,8 +87,10 @@ class SiteSettings extends Page
             Section::make('Site')->columns(2)->components([
                 TextInput::make('featured_slug')->label('Featured competition (web address name)')->alphaDash(),
                 TextInput::make('support_email')->email(),
-                TextInput::make('instagram_url')->url()->prefix('https://')->rule('starts_with:https://'),
-                TextInput::make('facebook_url')->url()->rule('starts_with:https://'),
+                TextInput::make('instagram_url')->label('Instagram')->url()->rule('starts_with:https://'),
+                TextInput::make('facebook_url')->label('Facebook')->url()->rule('starts_with:https://'),
+                TextInput::make('youtube_url')->label('YouTube')->url()->rule('starts_with:https://'),
+                TextInput::make('tiktok_url')->label('TikTok')->url()->rule('starts_with:https://'),
                 TextInput::make('meta_pixel_id')->label('Meta Pixel ID')->regex('/^\d{10,20}$/')
                     ->helperText('Numbers only, from Meta Events Manager. Leave empty for no Pixel. It only loads for visitors who accept marketing cookies.'),
             ]),
@@ -98,7 +100,7 @@ class SiteSettings extends Page
             ]),
             Section::make('Lucky Dip')->description('Lucky-dip basket builder for live draws. Off until you switch it on; prices are always the competition page prices.')->columns(3)->collapsible()->components([
                 Toggle::make('feature_gimme_box')->label('Lucky Dip on')->columnSpanFull()
-                    ->helperText('Shows the home page section, /gimme-box and the small links. It only appears when at least two live draws can go in a box.'),
+                    ->helperText('Shows the home page section, /lucky-dip and the small links. It only appears when at least two live draws can go in a box.'),
                 TextInput::make('gimme_box_chips')->label('Budget buttons (pence, comma separated)')->regex('/^\d{3,6}(,\d{3,6}){0,5}$/')->required()->columnSpan(2),
                 TextInput::make('gimme_box_bonus_pct')->label('Bonus tickets (%)')->integer()->minValue(0)->maxValue(50)->required()
                     ->helperText('Free extra tickets on every box, rounded down. Counts towards each draw’s bundle share limit.'),

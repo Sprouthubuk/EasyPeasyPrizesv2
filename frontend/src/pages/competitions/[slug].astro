@@ -45,7 +45,7 @@ const ticketCounts = (max: number, sold: number, left: number) => `Max ${max.toL
       <div class="stack g16">
         <HeroImage src={c.image} srcset={c.imageSrcset} alt={c.title}>
           {isDraw
-            ? <span class="tag tag-c" style="position:absolute;top:14px;left:14px;background:rgba(7,5,11,.88)"><span class="gg-ping" style="width:7px;height:7px;border-radius:999px;background:#22E6FF"></span> Live Draw</span>
+            ? <span class="tag tag-c" style="position:absolute;top:14px;left:14px;background:rgba(7,5,11,.88)"><span class="gg-ping" style="width:7px;height:7px;border-radius:999px;background:#3FD8FF"></span> Live Draw</span>
             : <span class="tag tag-y" style="position:absolute;top:14px;left:14px;background:rgba(7,5,11,.88)"><Icon name="bolt" size={11} stroke={3} /> {gameName(c)}</span>}
         </HeroImage>
       </div>
@@ -64,14 +64,14 @@ const ticketCounts = (max: number, sold: number, left: number) => `Max ${max.toL
         </div>
         <div class={`card card-p stack g12 gg-rise gg-d3 ${isDraw ? "card-cy" : ""}`}>
           {opensLater && <span class="eyebrow">Entries open in</span>}
-          {isDraw && !opensLater && <div class="row between"><span class="eyebrow">Draw starts in</span><span class="eyebrow" style="color:#22E6FF">Winner picked at random</span></div>}
+          {isDraw && !opensLater && <div class="row between"><span class="eyebrow">Draw starts in</span><span class="eyebrow" style="color:#3FD8FF">Winner picked at random</span></div>}
           <Countdown until={opensLater ?? (isDraw && c.drawAt ? c.drawAt : c.closesAt)} />
           <div class={`bar ${isDraw ? "cy" : ""}`} data-sold-bar={c.slug}><div class="gg-shine" style={`width:${c.soldPercent > 0 ? Math.max(c.soldPercent, 2) : 0}%`}></div></div>
           <div class="row between hint"><span data-sold-text={c.slug}><b>{c.status === "sold_out" ? "SOLD OUT" : `${c.soldPercent}% SOLD`}</b>{c.status !== "sold_out" && c.soldPercent >= 90 && <span class="ny"> · Almost gone!</span>}</span><span>{isDraw ? "" : "Results fixed when you buy"}</span></div>
           <div class="tcounts" data-testid="ticket-counts"><span data-ticket-counts={c.slug}>{ticketCounts(c.maxTickets, c.ticketsSold, c.ticketsLeft)}</span>{c.maxPerPerson ? ` · Max ${c.maxPerPerson.toLocaleString("en-GB")} per person` : ""}</div>
         </div>
         <TicketPicker client:load competitionId={c.id} slug={c.slug} type={c.type} pricePence={c.pricePence} presets={presets} popularPreset={c.popularPreset ?? null} minTickets={c.minTickets ?? 1} bundles={c.bundles ?? []} soldPercent={c.soldPercent} soldOut={c.status === "sold_out"} maxPerPerson={c.maxPerPerson ?? null} heldByMe={c.heldByMe ?? 0} open={open} opensAt={opensLater} salesOpen={site.salesOpen} signedIn={!!me} playBlock={me?.playBlock ?? null} />
-        {c.type === "draw" && site.gimmeBox?.available && <a class="tap" href="/gimme-box" style="font-weight:800" data-testid="gb-link">Can't decide? Try a Lucky Dip →</a>}
+        {c.type === "draw" && site.gimmeBox?.available && <a class="tap" href="/lucky-dip" style="font-weight:800" data-testid="gb-link">Can't decide? Try a Lucky Dip →</a>}
         <p class="hint" style="margin:0">No purchase necessary — <a href="/free-entry">enter free by post</a> with the same chance of winning. 18+ UK only · <a href="/legal/terms">T&amp;Cs</a></p>
       </div>
     </div>
@@ -156,7 +156,7 @@ const ticketCounts = (max: number, sold: number, left: number) => `Max ${max.toL
           <a class="tap" href="/legal/terms">T&amp;Cs</a>
         </span>
         {(c.renamedPrizes ?? []).length > 0 && <span data-testid="renamed-prizes">Renamed prizes: {c.renamedPrizes.map((r) => `${r.to} (${r.from} in the fair play record)`).join(", ")}.</span>}
-        {c.commitment && <span style="word-break:break-all;font-size:12px">Seed fingerprint <code style="color:#22E6FF">{c.commitment}</code></span>}
+        {c.commitment && <span style="word-break:break-all;font-size:12px">Seed fingerprint <code style="color:#3FD8FF">{c.commitment}</code></span>}
       </div>
     </div>
   </div></section>

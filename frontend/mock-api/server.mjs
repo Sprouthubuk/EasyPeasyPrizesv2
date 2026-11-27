@@ -246,7 +246,7 @@ const route = (method, pattern, fn) => routes.push({ method, re: new RegExp(`^${
 
 route("GET", "/sanctum/csrf-cookie", (req, res) => { res.writeHead(204, { "Set-Cookie": `XSRF-TOKEN=${crypto.randomBytes(12).toString("hex")}; Path=/; SameSite=Lax` }); res.end(); });
 route("GET", "/api/health", (req, res) => send(res, 200, { status: "ok", checks: { database: "ok", scheduler: "ok" } }));
-route("GET", "/api/site", (req, res) => send(res, 200, { salesOpen: true, minDepositPence: 500, minCardPence: 100, minWithdrawalPence: 2000, maxTopUpPence: 50000, featuredSlug: "bush-bucks-jungle-trial", socials: { instagram: "https://instagram.com/gimmegimmeprizes", facebook: "https://facebook.com/groups/gimmegimmeprizes" }, supportEmail: "hello@easypeasyprizes.com", metaPixelId: process.env.MOCK_PIXEL_ID ?? null,
+route("GET", "/api/site", (req, res) => send(res, 200, { salesOpen: true, minDepositPence: 500, minCardPence: 100, minWithdrawalPence: 2000, maxTopUpPence: 50000, featuredSlug: "bush-bucks-jungle-trial", socials: { instagram: "https://www.instagram.com/easypeasyprizes/", facebook: "https://www.facebook.com/groups/epfangroup", youtube: "https://www.youtube.com/@easypeasyprizes", tiktok: "https://www.tiktok.com/@easypeasyprizes" }, supportEmail: "hello@easypeasyprizes.com", metaPixelId: process.env.MOCK_PIXEL_ID ?? null,
   // Both features are on in the mock so the pages can be seen and tested; the real site starts with them off.
   gimmeBox: process.env.MOCK_FEATURES === "off" ? null : { available: true, chipsPence: [500, 1000, 2000, 5000], minPence: 500, maxPence: 10000, bonusPct: 10 },
   referrals: process.env.MOCK_FEATURES === "off" ? null : { rewardType: "tickets", rewardTickets: 10, rewardCreditPence: 200, minPurchasePence: 500 } }));
@@ -397,7 +397,7 @@ route("PATCH", "/api/me/profile", authed(async (req, res, { user }) => { const b
 route("PATCH", "/api/me/address", authed(async (req, res, { user }) => { const b = await readJson(req); if (user.address.line1) return fail(res, 422, "Contact us to change your address."); user.address = { line1: b.line1, line2: b.line2 || null, city: b.city, postcode: b.postcode }; send(res, 200, meJson(user)); }));
 route("PATCH", "/api/me/preferences", authed(async (req, res, { user }) => { const b = await readJson(req); user.marketing = { email: !!b.email, sms: !!b.sms, winNotifications: !!b.winNotifications }; send(res, 200, meJson(user)); }));
 route("POST", "/api/me/password", authed(async (req, res, { user }) => { const b = await readJson(req); if (b.currentPassword !== user.password) return fail(res, 422, "Your current password is wrong.", { currentPassword: ["Your current password is wrong."] }); user.password = b.password; send(res, 200, { ok: true }); }));
-route("POST", "/api/me/deposits", authed(async (req, res, { user }) => { const b = await readJson(req); if (!(b.amountPence >= 500)) return fail(res, 422, "The minimum top up is £5.", { amountPence: ["The minimum top up is £5."] }); const n = `GD-${++orderSeq}`; orders.set(n, { number: n, deposit: b.amountPence, user: user.email, status: "pending_payment", lines: [], totalPence: b.amountPence, cardPence: b.amountPence, walletPence: 0 }); send(res, 201, { redirectUrl: `${SELF}/mock-pay/${n}` }); }));
+route("POST", "/api/me/deposits", authed(async (req, res, { user }) => { const b = await readJson(req); if (!(b.amountPence >= 500)) return fail(res, 422, "The minimum top up is £5.", { amountPence: ["The minimum top up is £5."] }); const n = `ED-${++orderSeq}`; orders.set(n, { number: n, deposit: b.amountPence, user: user.email, status: "pending_payment", lines: [], totalPence: b.amountPence, cardPence: b.amountPence, walletPence: 0 }); send(res, 201, { redirectUrl: `${SELF}/mock-pay/${n}` }); }));
 // Like Laravel: ID documents first (multipart, accepted as they are here), then bank details with each withdrawal.
 route("POST", "/api/me/id-check", authed(async (req, res, { user }) => { for await (const _ of req); if (user.idCheck === "pending") return fail(res, 422, "We already have your documents and are checking them."); user.idCheck = "pending"; send(res, 201, { idCheck: "pending" }); }));
 route("POST", "/api/me/withdrawals", authed(async (req, res, { user }) => { const b = await readJson(req); if ((user.idCheck ?? "needed") !== "verified") return fail(res, 403, "We need to check your ID before your first withdrawal. Send your documents below."); const bad = {}; if (!/^[A-Za-z .'-]{2,70}$/.test(b.accountName ?? "")) bad.accountName = ["Use the name on the account, letters only."]; if (!/^\d{6}$/.test(String(b.sortCode ?? "").replace(/\D/g, ""))) bad.sortCode = ["A sort code is 6 numbers."]; if (!/^\d{8}$/.test(String(b.accountNumber ?? "").replace(/\D/g, ""))) bad.accountNumber = ["An account number is 8 numbers."]; if (Object.keys(bad).length) return fail(res, 422, "Please check the form.", bad); if (!(b.amountPence >= 2000) || b.amountPence > user.winnings) return fail(res, 422, "You can withdraw winnings from £20.", { amountPence: ["You can withdraw winnings from £20."] }); send(res, 201, { ok: true }); }));
@@ -418,7 +418,7 @@ route("POST", "/api/me/vouchers/:id/redeem", authed(async (req, res, { user, par
   if (!v) return fail(res, 404, "Not found.");
   if (v.status !== "available") return fail(res, 422, "This voucher can no longer be used.");
   if (!c || c.type !== "draw") return fail(res, 422, "That draw can't take these tickets right now. Please choose another.");
-  const number = `GG-V${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+  const number = `EP-V${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
   const order = { number, user: user.email, status: "created", totalPence: 0, cardPence: 0, walletPence: 0, lines: [{ competitionId: c.id, quantity: v.tickets, paidQuantity: 0, freeQuantity: v.tickets }] };
   orders.set(number, order);
   issue(user, order);
@@ -431,7 +431,7 @@ route("POST", "/api/checkout", authed(async (req, res, { user }) => {
   if (block) return fail(res, 403, block === "email_unverified" ? "Please confirm your email address before you play." : "You can't play right now.", undefined);
   const p = price(b.lines, user, b.promoCode);
   if (p.problems.length || p.lines.some((l) => l.problem)) return fail(res, 422, p.problems[0] ?? p.lines.find((l) => l.problem).problem);
-  const number = `GG-${++orderSeq}`;
+  const number = `EP-${++orderSeq}`;
   const walletPart = b.payWith === "wallet" ? p.totalPence : b.useWallet ? Math.min(total(user), p.totalPence) : 0;
   if (b.payWith === "wallet" && !p.walletCovers) return fail(res, 422, "Your wallet doesn't cover this order.");
   const cardPart = p.totalPence - walletPart;

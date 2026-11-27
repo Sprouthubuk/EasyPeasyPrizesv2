@@ -12,7 +12,7 @@ describe("Lucky Dip", () => {
   it("the home page, the box page and draw pages show it while it's on", async () => {
     const b = new Browser(site.origin);
     expect((await b.page("/")).html).toContain('data-testid="gimme-box"');
-    const page = await b.page("/gimme-box");
+    const page = await b.page("/lucky-dip");
     expect(page.res.status).toBe(200);
     expect(text(page.html)).toContain("Lucky Dip");
     expect((await b.page("/competitions/ninja-possiblecooker")).html).toContain('data-testid="gb-link"');

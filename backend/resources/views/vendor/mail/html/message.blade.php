@@ -22,7 +22,7 @@
 {{-- Footer --}}
 <x-slot:footer>
 <x-mail::footer>
-**Gimme Gimme Prizes** · Tiny tickets, ginormous prizes.
+**Easy Peasy Prizes Ltd** · Registered in Scotland · Company No. SC747746 · Clyde Offices 2nd Floor, 48 West George Street, Glasgow, G2 1BP
 
 18+ UK only. Free postal entry on every competition. Please play responsibly: set limits or take a break any time in [Safer Play]({{ $site }}/account/safer-play).
 

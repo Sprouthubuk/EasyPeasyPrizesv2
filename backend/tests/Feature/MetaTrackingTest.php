@@ -131,7 +131,7 @@ class MetaTrackingTest extends TestCase
         $this->topUp($u, 5000, 'bonus');
         $this->topUp($u, 5000, 'deposit');
         // Bonus pays at most half, so build the row by hand for an order whose real money is 0.
-        $o = Order::query()->create(['number' => 'GG-TEST1', 'user_id' => $u->id, 'order_type' => 'tickets', 'status' => 'paid', 'total_pence' => 100,
+        $o = Order::query()->create(['number' => 'EP-TEST1', 'user_id' => $u->id, 'order_type' => 'tickets', 'status' => 'paid', 'total_pence' => 100,
             'card_pence' => 0, 'wallet_pence' => 100, 'paid_bonus_pence' => 100, 'paid_at' => now()]);
         MetaEvent::query()->create(['event_name' => 'Purchase', 'event_id' => $o->number, 'user_id' => $u->id, 'order_id' => $o->id, 'status' => 'ready', 'context' => []]);
         $this->artisan('gimme:meta-events');
@@ -203,7 +203,7 @@ class MetaTrackingTest extends TestCase
     public function test_events_older_than_seven_days_expire(): void
     {
         $u = $this->player();
-        $o = Order::query()->create(['number' => 'GG-OLD1', 'user_id' => $u->id, 'order_type' => 'tickets', 'status' => 'pending_payment', 'total_pence' => 500, 'card_pence' => 500]);
+        $o = Order::query()->create(['number' => 'EP-OLD1', 'user_id' => $u->id, 'order_type' => 'tickets', 'status' => 'pending_payment', 'total_pence' => 500, 'card_pence' => 500]);
         $row = MetaEvent::query()->create(['event_name' => 'Purchase', 'event_id' => $o->number, 'user_id' => $u->id, 'order_id' => $o->id, 'status' => 'waiting', 'context' => []]);
         $row->forceFill(['created_at' => now()->subDays(8)])->saveQuietly();
         $this->artisan('gimme:meta-events');

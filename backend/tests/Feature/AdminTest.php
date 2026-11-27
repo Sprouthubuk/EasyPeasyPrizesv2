@@ -298,7 +298,7 @@ class AdminTest extends TestCase
     {
         $this->signInAdmin();
         $u = $this->player();
-        $o = Order::query()->create(['number' => 'GG-ATTN0001', 'user_id' => $u->id, 'order_type' => 'tickets', 'status' => 'paid', 'total_pence' => 100, 'card_pence' => 100, 'needs_attention' => true, 'attention_reason' => 'Sold out']);
+        $o = Order::query()->create(['number' => 'EP-ATTN0001', 'user_id' => $u->id, 'order_type' => 'tickets', 'status' => 'paid', 'total_pence' => 100, 'card_pence' => 100, 'needs_attention' => true, 'attention_reason' => 'Sold out']);
         Livewire::test(ListOrders::class)->assertCanSeeTableRecords([$o])->callTableAction('resolve', $o, ['reason' => 'Refunded by hand']);
         $this->assertFalse($o->refresh()->needs_attention);
     }

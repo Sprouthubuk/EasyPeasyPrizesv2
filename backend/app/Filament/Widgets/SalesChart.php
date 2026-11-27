@@ -26,8 +26,8 @@ class SalesChart extends ChartWidget
                 [
                     'label' => 'Ticket sales (£)',
                     'data' => array_map(fn ($p) => round($p / 100, 2), array_values($tickets)),
-                    'borderColor' => '#ff2daa',
-                    'backgroundColor' => 'rgba(255, 45, 170, 0.18)',
+                    'borderColor' => '#FF1E8C',
+                    'backgroundColor' => 'rgba(255,30,140, 0.18)',
                     'fill' => true,
                     'tension' => 0.35,
                     'pointRadius' => 0,
@@ -36,8 +36,8 @@ class SalesChart extends ChartWidget
                 [
                     'label' => 'Top ups (£)',
                     'data' => array_map(fn ($p) => round($p / 100, 2), array_values($topUps)),
-                    'borderColor' => '#22e6ff',
-                    'backgroundColor' => 'rgba(34, 230, 255, 0.08)',
+                    'borderColor' => '#3FD8FF',
+                    'backgroundColor' => 'rgba(63,216,255, 0.08)',
                     'fill' => true,
                     'tension' => 0.35,
                     'pointRadius' => 0,

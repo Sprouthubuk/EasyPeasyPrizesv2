@@ -22,7 +22,7 @@ export const GET: APIRoute = async ({ locals, site, url }) => {
   } catch {
     // The API is down: the fixed pages are still worth listing.
   }
-  const fixed = [...FIXED, ...(locals.site?.gimmeBox?.available ? ["/gimme-box"] : [])];
+  const fixed = [...FIXED, ...(locals.site?.gimmeBox?.available ? ["/lucky-dip"] : [])];
   const abs = (u: string) => (/^https?:/.test(u) ? u : `${base}${u.startsWith("/") ? "" : "/"}${u}`);
   const entries = [
     ...fixed.map((u) => `  <url><loc>${esc(base + u)}</loc></url>`),

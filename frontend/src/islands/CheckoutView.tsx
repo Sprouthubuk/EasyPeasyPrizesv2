@@ -121,7 +121,7 @@ export default function CheckoutView({ buy, walletPence, minCardPence, minDeposi
       <div className="card card-hot card-p stack g12 gg-rise gg-d5">
         <div className="row between"><span className="d" style={{ fontSize: 22 }}>To Pay</span><span className="d ny" style={{ fontSize: 38 }} data-testid="checkout-total">{formatMoney(total)}</span></div>
         {pay === "card" && walletPart > 0 && <div className="hint">{formatMoney(walletPart)} from your wallet · {formatMoney(cardPart)} by card</div>}
-        {cardTooSmall && <div className="notice notice-y" role="alert"><Svg name="info" size={18} /><span>Card payments start at {formatMoney(minCardPence)}. Add a few more tickets, or <a href="/account/wallet" style={{ color: "#FFF23A" }}>top up your wallet</a> and pay from there.</span></div>}
+        {cardTooSmall && <div className="notice notice-y" role="alert"><Svg name="info" size={18} /><span>Card payments start at {formatMoney(minCardPence)}. Add a few more tickets, or <a href="/account/wallet" style={{ color: "#00D2F5" }}>top up your wallet</a> and pay from there.</span></div>}
         {error && <div className="notice notice-p" role="alert"><Svg name="info" size={18} /><span>{error}</span></div>}
         <button type="button" className="btn btn-y btn-lg btn-block gg-cta" onClick={submit} disabled={busy || blocked || cardTooSmall} data-testid="pay">
           {busy ? <span className="spin" /> : pay === "wallet" ? `Pay ${formatMoney(total)} From Wallet` : `Pay ${formatMoney(cardPart)} By Card`}

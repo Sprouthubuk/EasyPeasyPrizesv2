@@ -12,7 +12,7 @@ class CashflowsTest extends TestCase
     {
         return ['data' => array_replace_recursive([
             'reference' => 'JOB-123', 'status' => 'Pending',
-            'order' => ['orderNumber' => 'GG-ABCD1234'], 'amountToCollect' => '12.50', 'currency' => 'GBP',
+            'order' => ['orderNumber' => 'EP-ABCD1234'], 'amountToCollect' => '12.50', 'currency' => 'GBP',
             'payments' => [
                 ['reference' => 'P-1', 'status' => 'Failed'],
                 ['reference' => 'P-2', 'status' => 'Paid', 'paymentMethod' => ['card' => ['cardType' => 'CREDIT']]],
@@ -23,20 +23,20 @@ class CashflowsTest extends TestCase
     public function test_reads_the_paid_payment_amount_order_and_card_type(): void
     {
         $a = CashflowsGateway::parse($this->job());
-        $this->assertSame(['JOB-123', 'GG-ABCD1234', 1250, 'paid', 'credit'], [$a->jobReference, $a->orderNumber, $a->amountPence, $a->status, $a->cardType]);
-        $this->assertNull($a->matches('JOB-123', 'GG-ABCD1234', 1250));
+        $this->assertSame(['JOB-123', 'EP-ABCD1234', 1250, 'paid', 'credit'], [$a->jobReference, $a->orderNumber, $a->amountPence, $a->status, $a->cardType]);
+        $this->assertNull($a->matches('JOB-123', 'EP-ABCD1234', 1250));
     }
 
     public function test_refuses_anything_that_does_not_match_or_is_missing(): void
     {
         $a = CashflowsGateway::parse($this->job());
-        $this->assertNotNull($a->matches('JOB-999', 'GG-ABCD1234', 1250));
-        $this->assertNotNull($a->matches('JOB-123', 'GG-OTHER000', 1250));
-        $this->assertNotNull($a->matches('JOB-123', 'GG-ABCD1234', 1251));
+        $this->assertNotNull($a->matches('JOB-999', 'EP-ABCD1234', 1250));
+        $this->assertNotNull($a->matches('JOB-123', 'EP-OTHER000', 1250));
+        $this->assertNotNull($a->matches('JOB-123', 'EP-ABCD1234', 1251));
         $missing = CashflowsGateway::parse(['data' => ['reference' => 'JOB-123', 'status' => 'Paid']]);
-        $this->assertSame('the answer carries no order number', $missing->matches('JOB-123', 'GG-ABCD1234', 1250));
+        $this->assertSame('the answer carries no order number', $missing->matches('JOB-123', 'EP-ABCD1234', 1250));
         $usd = CashflowsGateway::parse($this->job(['currency' => 'USD']));
-        $this->assertNotNull($usd->matches('JOB-123', 'GG-ABCD1234', 1250));
+        $this->assertNotNull($usd->matches('JOB-123', 'EP-ABCD1234', 1250));
     }
 
     public function test_status_mapping_and_reference_shape(): void
