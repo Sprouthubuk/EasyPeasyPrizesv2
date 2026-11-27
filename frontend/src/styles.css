@@ -896,3 +896,5 @@ a{color:var(--ep-cyan)}a:hover{color:var(--ep-pink)}
 .ep-auth-foot{text-align:center;font-size:12px;color:var(--ep-dim);margin:8px 16px 0}
 .ep-auth-foot a{color:var(--ep-text);text-decoration:underline;text-underline-offset:3px}
 .g:has(.ep-auth) .auth-hd .logo{display:none}
+.ep-tabs a,.ep-tabs button{min-height:40px}
+@media (min-width:1024px){.ft a{min-height:40px}.ft ul{gap:0}}
