@@ -1,14 +1,12 @@
 ---
-import { gameBadge } from "../lib/gameLabels";
 import Layout from "../layouts/Layout.astro";
 import CompCard from "../components/CompCard.astro";
 import Countdown from "../components/Countdown.astro";
-import HeroImage from "../components/HeroImage.astro";
 import Icon from "../components/Icon.astro";
 import GimmeBoxBuilder from "../islands/GimmeBoxBuilder";
 import type { CompetitionSummary, CompetitionDetail, InstantWinnerRow } from "../lib/types";
-import { formatPence, formatCount } from "../lib/money";
-import { ago, ukDateTime } from "../lib/time";
+import { formatMoney, formatPence } from "../lib/money";
+import { ago, endsIn, ukDateTime } from "../lib/time";
 
 const { api, site } = Astro.locals;
 // The independent calls run side by side once the visitor has a session (see api.hasSession).
@@ -16,123 +14,171 @@ const winnersCall = () => api.get<{ data: InstantWinnerRow[] }>("/api/winners/in
 const early = api.hasSession() ? winnersCall() : null;
 early?.catch(() => undefined); // still rejects where it is awaited; this only stops an early failure crashing Node
 const { data: comps } = await api.get<{ data: CompetitionSummary[] }>("/api/competitions?status=live");
-const instant = comps.filter((c) => c.type === "instant");
-const draws = comps.filter((c) => c.type === "draw");
-const featuredSlug = site.featuredSlug ?? comps.find((c) => c.featured)?.slug ?? instant[0]?.slug ?? null;
+const banner = site.homeBanner ?? null;
+const featuredSlug = site.featuredSlug ?? comps.find((c) => c.featured)?.slug ?? comps[0]?.slug ?? null;
 const [featured, { data: winners }] = await Promise.all([
-  featuredSlug ? api.maybe<CompetitionDetail>(`/api/competitions/${featuredSlug}`) : Promise.resolve(null),
+  !banner && featuredSlug ? api.maybe<CompetitionDetail>(`/api/competitions/${featuredSlug}`) : Promise.resolve(null),
   early ?? winnersCall(),
 ]);
-
-const ladder = featured?.prizes ?? [];
-const prizesLeft = ladder.reduce((n, p) => n + (p.quantity - p.won), 0);
-const prizesTotal = ladder.reduce((n, p) => n + p.quantity, 0);
 const opensLater = featured?.status === "scheduled" && featured.opensAt ? featured.opensAt : null;
-// A scrolling strip loops by sliding exactly one copy along, so each copy must be wider than the
-// widest screen: repeat short lists (about 16 pills is wider than 1440px), and pace it by length.
-const loopOf = <T,>(items: T[], min = 16): T[] => (items.length ? Array.from({ length: Math.max(1, Math.ceil(min / items.length)) }, () => items).flat() : []);
-const ladderLoop = loopOf(ladder);
-const winnersLoop = loopOf(winners, 8);
+const money = (p: number) => formatPence(p, { short: false });
+
+// Next draws: the three soonest open competitions, not counting the one in the hero.
+const open = comps.filter((c) => c.status === "live");
+const nextDraws = open.filter((c) => c.slug !== featured?.slug).sort((a, b) => (a.drawAt ?? a.closesAt).localeCompare(b.drawAt ?? b.closesAt)).slice(0, 3);
+
+// The competitions grid: open first, featured first, dearest first (as the old site), with four filters.
+const list = comps.filter((c) => c.status === "live" || c.status === "sold_out").sort((a, b) =>
+  Number(a.status === "sold_out") - Number(b.status === "sold_out") || Number(!!b.featured) - Number(!!a.featured) || b.pricePence - a.pricePence);
+const endingSoon = (c: CompetitionSummary) => { const ms = new Date(c.closesAt).getTime() - Date.now(); return ms > 0 && ms <= 864e5; };
+const filters: [string, string, (c: CompetitionSummary) => boolean][] = [
+  ["ending", "Ending Soon", endingSoon],
+  ["instant", "Instant Wins", (c) => c.type === "instant"],
+  ["draw", "Live Draws", (c) => c.type === "draw"],
+  ["all", "All", () => true],
+];
+const tags = (c: CompetitionSummary) => filters.filter(([, , f]) => f(c)).map(([k]) => k).join(" ");
+const trust = site.trust;
+const stats = [
+  trust?.paidOutPounds ? [`£${trust.paidOutPounds.toLocaleString("en-GB")}`, "Total paid out in prizes"] : null,
+  trust?.winnersCount ? [trust.winnersCount.toLocaleString("en-GB"), trust.winnersSinceYear ? `Winners since ${trust.winnersSinceYear}` : "Winners"] : null,
+].filter(Boolean) as [string, string][];
+const steps = [
+  ["Pick Your Competition", "Choose an instant win or a live draw and pick how many entries you want.", "tiles"],
+  ["Enter Online, Or Free By Post", "Buy your tickets, or enter free by post with exactly the same chance of winning.", "toggle"],
+  ["Instant Wins Land In Your Wallet", "Instant win prizes are credited straight away; live draw results are published.", "target"],
+];
 ---
-<Layout title="Home" active="home" fullTitle="UK Prize Competitions & Instant Win Games | Easy Peasy" description="Win cash, tech and more with UK online prize competitions from 1p: instant win games and live draws. 18+ UK only, free postal entry on every competition.">
-  {featured && (
-    <section class="sec" style="padding-top:20px"><div class="wrap split hero-split">
-      <div class="stack g16 hero-txt">
-        <div class="row g8 gg-rise gg-d2"><span class="gg-ping" style="width:8px;height:8px;border-radius:999px;background:#FF1E8C;box-shadow:0 0 10px #FF1E8C"></span><h1 class="eyebrow" style="color:#FF6FD0;margin:0">UK Prize Competitions · {opensLater ? `Coming soon · Opens ${ukDateTime(opensLater)}` : `Featured${prizesTotal ? ` · ${formatCount(prizesTotal)} instant wins` : ""}`}</h1></div>
-        <h2 class="h1 hero-title gg-rise gg-d2"><span class="np gg-flicker">{featured.title}</span></h2>
-        <p class="p gg-rise gg-d3">{featured.subtitle ?? featured.description.slice(0, 120)}{featured.topPrizePence ? <> · Top prize <b class="ny">{formatPence(featured.topPrizePence, { short: false })}</b>.</> : null}</p>
-        {opensLater && <div class="eyebrow gg-rise gg-d3" style="margin-bottom:-8px">Opens in</div>}
-        <Countdown until={opensLater ?? featured.closesAt} size="xl" class="gg-rise gg-d3" />
-        <div class="row g8 gg-rise gg-d5"><a class="btn btn-y btn-lg gg-cta" style="flex:1" href={`/competitions/${featured.slug}`}>{opensLater ? "See The Prizes" : `Play From ${formatPence(featured.pricePence)}`} <Icon name="arrow" size={18} stroke={3} /></a></div>
-        <p class="hint gg-rise gg-d6" style="margin:0">18+ UK only · <a href="/free-entry">Free postal entry</a> · <a href="/legal/terms">T&amp;Cs</a></p>
+<Layout title="Home" active="home" fullTitle="UK Prize Competitions & Instant Win Games | Easy Peasy" description="Win cash, tech and more with UK online prize competitions: instant win games and live draws. 18+ UK only, free postal entry on every competition." shareImage="/og-image.png">
+  <h1 class="sr-only">Easy Peasy Prizes: UK prize competitions and instant wins</h1>
+  {banner ? (
+    <section class="ep-banner"><a href="/competitions" aria-label={`${banner.alt}. Browse competitions`}><img src={banner.url} alt={banner.alt} width="1672" height="941" fetchpriority="high" decoding="async"></a></section>
+  ) : featured && (
+    <section class="ep-hero"><div class="wrap ep-hero-in">
+      <a class="ep-hero-img" href={`/competitions/${featured.slug}`}>
+        <img src={featured.image} srcset={featured.imageSrcset ?? undefined} sizes="(min-width:1024px) 640px, 100vw" alt={featured.title} width="640" height="640" fetchpriority="high">
+        <span class={`pill ${featured.type === "draw" ? "pill-live" : "pill-iw"}`}>{featured.type === "draw" ? "Live Draw" : "Instant Win"}</span>
+      </a>
+      <div class="card ep-hero-card">
+        <div class="eyebrow">{opensLater ? `Opens ${ukDateTime(opensLater)}` : "Featured competition"}</div>
+        <h2 class="h2 ep-hero-title">{featured.title}</h2>
+        {featured.topPrizePence ? <p class="ep-hero-win">{featured.type === "draw" ? `Worth ${money(featured.topPrizePence)}` : `Win up to ${money(featured.topPrizePence)}`}{featured.cashAlternativePence ? ` · or ${money(featured.cashAlternativePence)} cash` : ""}</p> : null}
+        <div class="ep-hero-box">
+          <div class="label-caps">{opensLater ? "Opens in" : "Draw closes in"}</div>
+          <Countdown until={opensLater ?? featured.closesAt} size="xl" />
+        </div>
+        <div class="ep-hero-sold"><div class="bar"><div style={`width:${featured.soldPercent > 0 ? Math.max(featured.soldPercent, 2) : 0}%`}></div></div><div class="row between hint"><span>{featured.soldPercent}% sold</span><span>Draw {ukDateTime(featured.drawAt ?? featured.closesAt)}</span></div></div>
+        <div class="row between g16 ep-hero-buy">
+          <div><div class="label-caps">Per ticket</div><div class="d ep-hero-price">{formatMoney(featured.pricePence)}</div></div>
+          <a class="btn btn-y btn-lg gg-cta" href={`/competitions/${featured.slug}`}>{opensLater ? "See The Prizes" : "Enter Now"}</a>
+        </div>
+        <p class="hint" style="margin:0">18+ UK only · <a href="/free-entry">Enter free by post</a> · <a href="/legal/terms">T&amp;Cs</a></p>
       </div>
-      <HeroImage src={featured.image} srcset={featured.imageSrcset} alt={featured.title} float class="hero-top">
-        {gameBadge(featured) && <span class="tag tag-y" style="position:absolute;top:14px;left:14px;background:rgba(7,5,11,.88)"><Icon name="bolt" size={11} stroke={3} /> {gameBadge(featured)}</span>}
-        {prizesTotal > 0 && <span class="gg-pop gg-d6" style="position:absolute;right:10px;bottom:14px;background:rgba(7,5,11,.9);border:1px solid #3FD8FF;border-radius:14px;padding:8px 12px;box-shadow:0 0 20px rgba(63,216,255,.35)"><span class="eyebrow" style="display:block">Still to win</span><span class="d nc" style="font-size:22px">{formatCount(prizesLeft)} prizes</span></span>}
-      </HeroImage>
-    </div>
-    {winners.length > 0 ? (
-      <div class="wrap" style="margin-top:24px"><div class="wfeed" aria-label="Live winners">
-        <span class="wl"><span class="gg-ping"></span>Live <b>Winners</b></span>
-        <div class="wm"><div class="gg-marq" data-winners={winners.map((w) => w.id).join()} style={`animation-duration:${winnersLoop.length * 4}s`}>
-          {[...winnersLoop, ...winnersLoop].map((w, i) => (
-            <span class="wp" aria-hidden={i >= winners.length ? "true" : undefined}><span class="av">{w.name.slice(0, 1)}</span><span><b>{w.name}</b> won <b class="ny">{w.prizeName}</b><small>{w.competitionTitle} · {ago(w.at)}</small></span></span>
-          ))}
-        </div></div>
-        <a href="/instant-winners" class="dsk wa">All Winners →</a>
-      </div></div>
-    ) : ladder.length > 0 && (
-      <div class="wrap" style="margin-top:24px"><div style="border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);padding:12px 0;overflow:hidden" aria-label="Prize ladder">
-        <div class="gg-marq" style={`animation-duration:${ladderLoop.length * 3.5}s`}>{[...ladderLoop, ...ladderLoop].map((p, i) => <span aria-hidden={i >= ladder.length ? "true" : undefined} style="white-space:nowrap;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800"><span class="d" style="color:#FF6FD0">{formatPence(p.valuePence)}</span> <span class="dim">×</span> {formatCount(p.quantity)}</span>)}</div>
-      </div></div>
-    )}
-    </section>
-  )}
-
-  <section id="instant"><div class="wrap stack g16">
-    <h2 class="h2 gg-reveal sh"><span class="np">Instant</span> Wins</h2>
-    {instant.length ? <div class="grid-c gg-stagger">{instant.map((c) => <CompCard c={c} />)}</div> : <div class="card empty">New instant win games are on their way.</div>}
-  </div></section>
-
-  {draws.length > 0 && (
-    <section id="draws" class="sec"><div class="wrap stack g16">
-      <h2 class="h2 gg-reveal sh"><span class="nc">Live</span> Draws</h2>
-      <div class="grid-c gg-stagger">{draws.map((c) => <CompCard c={c} />)}</div>
     </div></section>
   )}
+
+  {nextDraws.length > 0 && (
+    <section class="ep-next"><div class="wrap"><div class="ep-next-grid">
+      {nextDraws.map((c) => {
+        const ms = new Date(c.drawAt ?? c.closesAt).getTime() - Date.now();
+        return (
+          <a class="ep-draw" href={`/competitions/${c.slug}`}>
+            <img src={c.imageSmall} alt="" width="62" height="62" loading="lazy">
+            <span class="ep-draw-txt"><span class={`ep-mono ${c.type === "draw" ? "cy" : "pk"}`}>{c.type === "draw" ? "Live Draw" : "Instant Win"}</span><b>{c.title}</b><small>{c.topPrizePence ? `${money(c.topPrizePence)} · ` : ""}{formatMoney(c.pricePence)} per entry</small></span>
+            <span class={`ep-draw-time ${ms > 0 && ms < 864e5 ? "hot" : ""}`} data-ends={c.drawAt ?? c.closesAt}>{endsIn(c.drawAt ?? c.closesAt)}</span>
+          </a>
+        );
+      })}
+    </div></div></section>
+  )}
+
+  <section class="sec band" id="competitions"><div class="wrap">
+    <div class="ep-head">
+      <div><h2 class="h2">Competitions</h2><p class="p">{open.length} open right now</p></div>
+      {list.length > 0 && <div class="ep-tabs" role="group" aria-label="Filter competitions">{filters.map(([k, label]) => <button type="button" class={k === "all" ? "on" : ""} aria-pressed={k === "all" ? "true" : "false"} data-filter={k}>{label}</button>)}</div>}
+    </div>
+    {list.length ? (
+      <div class="grid-c" data-home-grid>{list.map((c) => <div class="ep-cell" data-tags={tags(c)}><CompCard c={c} /></div>)}</div>
+    ) : <div class="card empty">New competitions are on their way.</div>}
+    <p class="p" data-home-none hidden>No competitions match this filter.</p>
+    <a class="btn btn-c btn-block ep-seeall" href="/competitions">See All Competitions</a>
+  </div></section>
 
   {site.gimmeBox && (
     <section id="lucky-dip" class="sec"><div class="wrap stack g16">
       <div class="stack g8">
-        <h2 class="h2 gg-reveal sh">Lucky <span class="np">Dip</span></h2>
-        <p class="p" style="margin:0">Can't decide? Set a budget and we'll pack a mix of live draw tickets for you{site.gimmeBox.bonusPct > 0 ? <>, plus <b class="ny">{site.gimmeBox.bonusPct}% bonus tickets</b> free</> : null}.</p>
+        <h2 class="h2">Lucky Dip</h2>
+        <p class="p" style="margin:0">Can't decide? Set a budget and we'll pack a mix of live draw tickets for you{site.gimmeBox.bonusPct > 0 ? <>, plus <b class="np">{site.gimmeBox.bonusPct}% bonus tickets</b> free</> : null}.</p>
       </div>
       <GimmeBoxBuilder client:visible available={site.gimmeBox.available} chipsPence={site.gimmeBox.chipsPence} minPence={site.gimmeBox.minPence} maxPence={site.gimmeBox.maxPence} bonusPct={site.gimmeBox.bonusPct} />
     </div></section>
   )}
 
-  <section class="sec"><div class="wrap stack g20">
-    <h2 class="h2 gg-reveal">How It <span class="nc">Works</span></h2>
-    <div class="rail gg-stagger">
-      <div class="card card-p stack g8 gg-card"><span class="d np" style="font-size:40px;line-height:1">01</span><h3 class="h3">Pick A Comp</h3><p class="p" style="font-size:14px">Instant wins and live draws for cash, tech and more. Tickets from 1p.</p></div>
-      <div class="card card-p stack g8 gg-card"><span class="d nc" style="font-size:40px;line-height:1">02</span><h3 class="h3">Grab Tickets</h3><p class="p" style="font-size:14px">Pay from your wallet or by card, or enter free by post. Ticket numbers are given at random.</p></div>
-      <div class="card card-p stack g8 gg-card"><span class="d ny" style="font-size:40px;line-height:1">03</span><h3 class="h3">Win Prizes</h3><p class="p" style="font-size:14px">Instant wins show in your reveal game straight away. Live draws are drawn on the date shown. Cash wins go to your wallet.</p></div>
+  <section class="sec"><div class="wrap ep-how">
+    <div>
+      <h2 class="h2">How It Works</h2>
+      <p class="p ep-how-intro">Three steps, no small print games. Every competition has a free postal entry route and a published closing time.</p>
+      <a class="tap ep-how-link" href="/free-entry">Free postal entry route →</a>
+    </div>
+    <div class="ep-steps">
+      {steps.map(([title, body, icon], i) => (
+        <article class="ep-step">
+          <div class="ep-step-ico" aria-hidden="true">
+            {icon === "tiles" && <svg viewBox="0 0 64 44" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="26" height="36" rx="7" class="pk"/><rect x="34" y="4" width="13" height="36" rx="6" class="cy"/><rect x="51" y="4" width="11" height="36" rx="5" class="cy" opacity=".55"/></svg>}
+            {icon === "toggle" && <svg viewBox="0 0 64 44" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="8" width="52" height="28" rx="14" class="cy"/><circle cx="24" cy="22" r="7" class="pk" fill="currentColor" stroke="none"/></svg>}
+            {icon === "target" && <svg viewBox="0 0 64 44" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="32" cy="22" r="17" class="cy"/><circle cx="32" cy="22" r="10" class="pk"/><circle cx="32" cy="22" r="3.5" class="pk" fill="currentColor" stroke="none"/></svg>}
+          </div>
+          <div><p class="ep-mono pk">Step {i + 1}</p><h3 class="h3 ep-step-t">{title}</h3><p class="ep-step-b">{body}</p></div>
+        </article>
+      ))}
     </div>
   </div></section>
-  <section class="sec"><div class="wrap stack g12" style="max-width:760px">
-    <h2 class="h2 gg-reveal">Online Prize Competitions <span class="np">In The UK</span></h2>
-    <p class="p">Easy Peasy Prizes runs online competitions for players in the UK aged 18 and over. Choose an <a href="/competitions?type=instant">instant win competition</a> and play a reveal game to see straight away whether your ticket has won, or enter a <a href="/competitions?type=draw">live draw</a> for a bigger prize, drawn when the competition closes.</p>
-    <p class="p">Tickets start from 1p and every ticket number is given at random. Winning ticket numbers and entry lists are public, every winner is published on our <a href="/winners">winners page</a>, and every competition can be entered for free by post: see <a href="/free-entry">free postal entry</a> or read <a href="/how-it-works">how it works</a>.</p>
+
+  {stats.length > 0 && (
+    <section class="sec band"><div class="wrap"><div class={`ep-stats n${stats.length}`}>
+      {stats.map(([value, label]) => <div class="ep-stat"><div class="d">{value}</div><div>{label}</div></div>)}
+    </div></div></section>
+  )}
+
+  <section class="sec bt-line"><div class="wrap">
+    <div class="ep-head" style="flex-direction:row;align-items:flex-end;justify-content:space-between">
+      <div><h2 class="h2">Recent Winners</h2><p class="p" style="font-size:15px">Every winner is published here as soon as they win.</p></div>
+      <a class="btn btn-o dskf" href="/instant-winners">View All Winners</a>
+    </div>
+    {winners.length ? (
+      <div class="ep-winners">{winners.slice(0, 4).map((w) => (
+        <article class="ep-winner"><span class="ep-winner-ico"><Icon name="trophy" size={18} /></span><b>{w.name}</b><span class="pk">{w.prizeName}</span><small>{w.competitionTitle}</small><span class="ep-mono">{ago(w.at)}</span></article>
+      ))}</div>
+    ) : <div class="ep-nowin"><Icon name="trophy" size={44} /><p>No winners announced yet. Enter now to be the first!</p></div>}
+    <a class="btn btn-o btn-block mob" style="margin-top:24px" href="/instant-winners">View All Winners</a>
+  </div></section>
+
+  <section class="sec bt-line"><div class="wrap" style="max-width:900px;margin-left:0">
+    <h2 class="h3">Online Prize Competitions In The UK</h2>
+    <p class="p" style="margin-top:12px;font-size:13px">Easy Peasy Prizes runs online competitions for players in the UK aged 18 and over. Choose an <a href="/competitions?type=instant">instant win competition</a> and see straight away whether your ticket has won, or enter a <a href="/competitions?type=draw">live draw</a> for a bigger prize, drawn when the competition closes.</p>
+    <p class="p" style="margin-top:8px;font-size:13px">Every ticket number is given at random. Winning ticket numbers and entry lists are public, every winner is published on our <a href="/winners">results page</a>, and every competition can be entered for free by post: see <a href="/free-entry">free postal entry</a> or read <a href="/how-it-works">how it works</a>.</p>
   </div></section>
 <script>
-  import { ago } from "../lib/time";
-  // Keeps the featured winners feed live: new winners every minute, built with textContent (never HTML).
-  const strip = document.querySelector<HTMLElement>("[data-winners]");
-  type W = { id: string; name: string; prizeName: string; competitionTitle: string; at: string };
-  let shown = strip?.dataset.winners ?? "";
-  const pill = (w: W, copy: boolean) => {
-    const el = document.createElement("span");
-    el.className = "wp";
-    if (copy) el.setAttribute("aria-hidden", "true");
-    const av = el.appendChild(document.createElement("span")); av.className = "av"; av.textContent = w.name.slice(0, 1);
-    const tx = el.appendChild(document.createElement("span"));
-    tx.append(Object.assign(document.createElement("b"), { textContent: w.name }), " won ", Object.assign(document.createElement("b"), { textContent: w.prizeName, className: "ny" }));
-    tx.appendChild(document.createElement("small")).textContent = `${w.competitionTitle} · ${ago(w.at)}`;
-    return el;
+  // The competitions filter: Ending Soon / Instant Wins / Live Draws / All, eight at most (four on phones).
+  const grid = document.querySelector<HTMLElement>("[data-home-grid]");
+  const none = document.querySelector<HTMLElement>("[data-home-none]");
+  const show = (key: string) => {
+    if (!grid) return;
+    let n = 0;
+    grid.querySelectorAll<HTMLElement>(".ep-cell").forEach((cell) => {
+      const match = (cell.dataset.tags ?? "").split(" ").includes(key);
+      cell.hidden = !match || n >= 8;
+      cell.classList.toggle("ep-more", match && n >= 4);
+      if (match) n++;
+    });
+    if (none) none.hidden = n > 0;
+    document.querySelectorAll<HTMLButtonElement>("[data-filter]").forEach((b) => {
+      const on = b.dataset.filter === key;
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
   };
-  const refresh = async () => {
-    try {
-      const res = await fetch("/api/winners/instant?limit=12", { headers: { Accept: "application/json" }, credentials: "same-origin" });
-      if (!res.ok) return;
-      const list: W[] = (await res.json()).data ?? [];
-      const key = list.map((w) => w.id).join();
-      if (!strip || !list.length || key === shown) return;
-      shown = key;
-      const loop = Array.from({ length: Math.max(1, Math.ceil(8 / list.length)) }, () => list).flat();
-      strip.replaceChildren(...[...loop, ...loop].map((w, i) => pill(w, i >= list.length)));
-      strip.style.animationDuration = `${loop.length * 4}s`;
-    } catch { /* keep what is showing */ }
-  };
-  if (strip) setInterval(refresh, 60_000);
+  document.querySelectorAll<HTMLButtonElement>("[data-filter]").forEach((b) => b.addEventListener("click", () => show(b.dataset.filter!)));
+  show("all");
 </script>
 </Layout>

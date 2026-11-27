@@ -1,4 +1,5 @@
 ---
+import PageHead from "../components/PageHead.astro";
 import Layout from "../layouts/Layout.astro";
 import Icon from "../components/Icon.astro";
 import { FAQS, FAQ_CATEGORIES } from "../lib/faqs";
@@ -8,8 +9,8 @@ const q = (Astro.url.searchParams.get("q") ?? "").trim().toLowerCase().slice(0, 
 const list = FAQS.filter(([c, qq, a]) => (!cat || c === cat) && (!q || `${qq} ${a}`.toLowerCase().includes(q)));
 ---
 <Layout title="Competition FAQs" description="Answers about our UK prize competitions: entering, ticket numbers, instant wins, live draws, free postal entry, payments, winnings and safer play." noindex={!!q || !!cat} jsonLd={[faqLd(FAQS.map(([, qq, a]) => ({ q: qq, a })))]}>
-  <section class="sec" style="padding-top:20px"><div class="mid stack g16">
-    <div class="gg-rise"><div class="eyebrow">Help</div><h1 class="h1">Got A <span class="np gg-flicker">Question?</span></h1></div>
+  <PageHead title="Frequently Asked Questions" eyebrow="Help" lead="Find answers to the most common questions about our competitions." center />
+  <section class="sec"><div class="mid stack g16">
     <form method="get" class="gg-rise gg-d2" role="search"><label style="position:relative;display:block"><span style="position:absolute;left:14px;top:15px;color:#8E84A0"><Icon name="search" /></span><input class="inp" type="search" name="q" value={q} placeholder="Search FAQs" aria-label="Search FAQs" style="padding-left:44px"></label></form>
     <div class="scrollx gg-rise gg-d3"><a class={`chip ${!cat ? "on" : ""}`} href="/faq">All</a>{FAQ_CATEGORIES.map((c) => <a class={`chip ${cat === c ? "on" : ""}`} href={`/faq?c=${encodeURIComponent(c)}`}>{c.replace(/\b\w/g, (m) => m.toUpperCase())}</a>)}</div>
     <div class="stack g8 gg-stagger">{list.length ? list.map(([, qq, a], i) => <details class="acd" open={i === 0}><summary>{qq} <Icon name="down" /></summary><div class="ab">{a}</div></details>) : <div class="card empty">No answers match that. <a href="/contact">Ask us</a></div>}</div>

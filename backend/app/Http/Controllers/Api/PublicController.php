@@ -48,6 +48,12 @@ class PublicController extends Controller
         return new CompetitionPresenter($this->state(), new Bundles($this->state()));
     }
 
+    /** A whole number an admin typed, or null when empty or not a number. */
+    private static function wholeOrNull(?string $v): ?int
+    {
+        return $v !== null && preg_match('/^\d{1,10}$/', trim($v)) ? (int) trim($v) : null;
+    }
+
     public function site(): JsonResponse
     {
         return response()->json([
@@ -59,6 +65,17 @@ class PublicController extends Controller
             'featuredSlug' => Setting::get('featured_slug') ?: Competition::query()->published()->where('featured', true)->where('closes_at', '>', now())->orderBy('closes_at')->value('slug'),
             'socials' => ['instagram' => Setting::get('instagram_url'), 'facebook' => Setting::get('facebook_url'), 'youtube' => Setting::get('youtube_url'), 'tiktok' => Setting::get('tiktok_url')],
             'supportEmail' => Setting::get('support_email'),
+            // Easy Peasy's header and home page: the admin's own figures, null when not set (then not shown).
+            'homeBanner' => ($banner = trim((string) Setting::get('home_banner'))) !== ''
+                ? ['url' => str_starts_with($banner, 'http') || str_starts_with($banner, '/') ? $banner : '/storage/'.ltrim($banner, '/'), 'alt' => Setting::get('home_banner_alt') ?: 'Easy Peasy Prizes']
+                : null,
+            'trust' => [
+                'paidOutPounds' => self::wholeOrNull(Setting::get('paid_out_pounds')),
+                'winnersCount' => self::wholeOrNull(Setting::get('winners_count')),
+                'winnersSinceYear' => self::wholeOrNull(Setting::get('winners_since_year')),
+                'supportingName' => Setting::get('supporting_name') ?: null,
+                'supportingUrl' => str_starts_with((string) Setting::get('supporting_url'), 'https://') ? Setting::get('supporting_url') : null,
+            ],
             'metaPixelId' => preg_match('/^\d{10,20}$/', (string) Setting::get('meta_pixel_id')) ? Setting::get('meta_pixel_id') : null,
             // Switched-off features are null, so nothing of them shows anywhere.
             'gimmeBox' => Settings::gimmeBoxOn() ? [

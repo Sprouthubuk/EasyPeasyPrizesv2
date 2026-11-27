@@ -28,6 +28,13 @@ const SEO: Record<string, { title: string; h1: [string, string]; description: st
   christmas: { title: "Christmas Competitions | Easy Peasy Prizes", h1: ["Christmas", "Competitions"], description: "Christmas prize competitions: festive instant win games and live draws for cash and prizes. 18+ UK only, free postal entry on every one." },
 };
 const seo = SEO[t[0]] ?? SEO.all;
+const INTRO: Record<string, string> = {
+  all: "Every live competition in one place: instant wins you can play straight away and live draws for bigger prizes.",
+  instant: "Reveal your ticket the moment you check out, and any prize you win is credited straight to your account.",
+  draw: "Pick your tickets and watch the draw. Every winner and winning ticket number is published when the competition closes.",
+  under10: "Low-cost entries: instant wins and live draws with tickets under 10p.",
+  christmas: "Festive instant wins and live draws.",
+};
 let list = all.filter(t[2]);
 if (q) list = list.filter((c) => `${c.title} ${c.gameLabel ?? ""} ${gameName(c) ?? ""}`.toLowerCase().includes(q.toLowerCase()));
 const sorters: Record<string, (a: CompetitionSummary, b: CompetitionSummary) => number> = {
@@ -46,21 +53,31 @@ const link = (k: string) => {
   return `/competitions${s ? "?" + s : ""}`;
 };
 ---
-<Layout title="All Competitions" fullTitle={seo.title} active="competitions" description={seo.description} canonicalKeys={["type"]} noindex={!!q}>
-  <section class="sec" style="padding-top:20px"><div class="wrap stack g16">
-    <div class="gg-rise"><div class="eyebrow">{all.length} Live Now · New Comps Every Week</div><h1 class="h1">{seo.h1[0]}{" "}<span class="np gg-flicker">{seo.h1[1]}</span></h1></div>
-    <form class="row g8 gg-rise gg-d2" method="get" action="/competitions" role="search">
-      {type !== "all" && <input type="hidden" name="type" value={type}>}
-      <label style="position:relative;flex:1"><span style="position:absolute;left:14px;top:15px;color:#8E84A0"><Icon name="search" /></span><input class="inp" type="search" name="q" value={q} placeholder="Search prizes, games or cash" aria-label="Search competitions" style="padding-left:44px"></label>
-      <select class="inp" name="sort" aria-label="Sort" style="width:auto;min-width:130px" onchange="this.form.submit()">
-        <option value="ending" selected={sort === "ending"}>Ending soon</option>
-        <option value="price" selected={sort === "price"}>Price: low</option>
-        <option value="prize" selected={sort === "prize"}>Biggest prize</option>
-        <option value="newest" selected={sort === "newest"}>Newest</option>
-      </select>
-      <noscript><button class="btn btn-o" type="submit">Go</button></noscript>
-    </form>
-    <div class="scrollx gg-rise gg-d3" role="group" aria-label="Filter">{TYPES.map(([k, label, f]) => <a class={`chip ${k === t[0] ? "on" : ""}`} href={link(k)} aria-current={k === t[0] ? "true" : undefined}>{label} {all.filter(f).length}</a>)}</div>
-    {list.length ? <div class="grid-c gg-stagger">{list.map((c) => <CompCard c={c} />)}</div> : <div class="card empty">No competitions match that. <a class="tap" href="/competitions">Show all</a></div>}
+<Layout title="All Competitions" fullTitle={seo.title} active={t[0] === "instant" ? "instant-wins" : "competitions"} description={seo.description} canonicalKeys={["type"]} noindex={!!q}>
+  <section class="ep-pagehead"><div class="wrap">
+    <nav class="ep-crumbs" aria-label="Breadcrumb"><a href="/competitions">Competitions</a>{t[0] !== "all" && <> / <b>{t[1]}</b></>}</nav>
+    <div class="ep-listhead">
+      <div><h1 class="h1">{t[0] === "all" ? "All Competitions" : t[0] === "instant" ? "Instant Wins" : t[0] === "draw" ? "Live Draws" : seo.h1.join(" ")}</h1><p class="p">{INTRO[t[0]] ?? INTRO.all}</p></div>
+      <form class="ep-listtools" method="get" action="/competitions" role="search">
+        {type !== "all" && <input type="hidden" name="type" value={type}>}
+        <label class="ep-search"><Icon name="search" size={16} /><input class="inp" type="search" name="q" value={q} placeholder="Search competitions" aria-label="Search competitions"></label>
+        <span class="hint dskf" style="white-space:nowrap">Showing <b style="color:#EEF0FF">{list.length}</b>{" "}{list.length === 1 ? "competition" : "competitions"}</span>
+        <label class="ep-sort"><span>Sort</span><select name="sort" aria-label="Sort" onchange="this.form.submit()">
+          <option value="ending" selected={sort === "ending"}>Ending soonest</option>
+          <option value="price" selected={sort === "price"}>Price: low to high</option>
+          <option value="prize" selected={sort === "prize"}>Biggest prize</option>
+          <option value="newest" selected={sort === "newest"}>Newest</option>
+        </select><Icon name="down" size={14} /></label>
+        <noscript><button class="btn btn-o btn-sm" type="submit">Go</button></noscript>
+      </form>
+    </div>
+  </div></section>
+  <section class="ep-filterbar"><div class="wrap"><div class="scrollx" role="group" aria-label="Filter"><span class="hint dskf" style="align-self:center;margin-right:4px">Filter by</span>{TYPES.filter(([k, , f]) => k === "all" || k === t[0] || all.some(f)).map(([k, label, f]) => <a class={`chip ${k === t[0] ? "on" : ""}`} href={link(k)} aria-current={k === t[0] ? "true" : undefined}>{label} <span class="ep-count">{all.filter(f).length}</span></a>)}</div></div></section>
+  <section class="sec" style="padding-top:40px"><div class="wrap">
+    {list.length ? <div class="grid-c">{list.map((c) => <CompCard c={c} />)}</div> : <div class="card empty">No competitions match that. <a class="tap" href="/competitions">Show all</a></div>}
+  </div></section>
+  <section class="ep-ctaband"><div class="wrap ep-ctaband-in">
+    <div><h2 class="h2">{t[0] === "draw" ? "How live draws work" : t[0] === "instant" ? "How instant wins work" : "How it works"}</h2><p class="p">{t[0] === "draw" ? "Every ticket number is given at random. When the competition closes, the winning ticket is drawn and published on our results page." : "Choose your entries and complete checkout. Instant win tickets are revealed straight away, with any prize credited directly to your account."}</p></div>
+    <div class="row wrapx g12"><a class="btn btn-y" href="/how-it-works">How It Works</a><a class="btn btn-o" href="/free-entry">Free Postal Entry</a>{t[0] !== "all" && <a class="btn btn-o" href="/competitions">View All Competitions</a>}</div>
   </div></section>
 </Layout>

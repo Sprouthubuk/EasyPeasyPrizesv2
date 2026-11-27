@@ -1,7 +1,6 @@
 ---
 import "../styles.css";
 import Header from "../components/Header.astro";
-import BottomNav from "../components/BottomNav.astro";
 import Footer from "../components/Footer.astro";
 import CookieBanner from "../components/CookieBanner.astro";
 import { BRAND, ldJson, organisationLd, pageTitle, websiteLd } from "../lib/seo";
@@ -12,6 +11,7 @@ interface Props {
   header?: "main" | "auth" | "secure" | "menu";
   headerBack?: string;
   headerTitle?: string;
+  /** Kept for older pages: Easy Peasy has no bottom tab bar. */
   bottomNav?: boolean;
   footer?: boolean;
   /** Only the page itself: no header, footer, tab bar or cookie banner (the admin's game previewer frames it). */
@@ -26,7 +26,7 @@ interface Props {
   /** Structured data (schema.org) for this page. */
   jsonLd?: Record<string, unknown>[];
 }
-const { title, description = "UK prize competitions from 1p: instant win games and live draws for cash, tech and more. 18+ UK only, free postal entry on every competition.", active = "", header = "main", headerBack, headerTitle, bottomNav = true, footer = true, noindex = false, bare = false, shareImage = null, fullTitle, canonicalKeys = [], jsonLd = [] } = Astro.props;
+const { title, description = "UK prize competitions from 1p: instant win games and live draws for cash, tech and more. 18+ UK only, free postal entry on every competition.", active = "", header = "main", headerBack, headerTitle, footer = true, noindex = false, bare = false, shareImage = null, fullTitle, canonicalKeys = [], jsonLd = [] } = Astro.props;
 const full = fullTitle ?? pageTitle(title);
 const robots = noindex || import.meta.env.PUBLIC_SEARCH_INDEXING !== "on" ? "noindex, nofollow" : "index, follow, max-image-preview:large";
 const base = Astro.site ?? Astro.url;
@@ -63,19 +63,18 @@ const verification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
   <meta property="og:title" content={full}>
   <meta property="og:description" content={description}>
   <meta property="og:type" content="website">
-  <meta property="og:image" content={new URL(shareImage || "/logo.png", base).toString()}>
-  <meta name="twitter:card" content={shareImage ? "summary_large_image" : "summary"}>
+  <meta property="og:image" content={new URL(shareImage || "/og-image.png", base).toString()}>
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content={full}>
   <meta name="twitter:description" content={description}>
   {!noindex && !bare && <script type="application/ld+json" set:html={ldJson(ld)} />}
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
-  <div class={`g ${bottomNav && !bare ? "has-bn" : ""}`}>
+  <div class="g">
     {!bare && <Header active={active} variant={header} back={headerBack} title={headerTitle} />}
-    <main id="main"><slot /></main>
+    <main id="main" class={header === "auth" ? "ep-auth" : undefined}><slot />{header === "auth" && <p class="ep-auth-foot">18+ only · Please play responsibly · <a href="https://www.begambleaware.org" rel="noopener" target="_blank">BeGambleAware</a> · <a href="/free-entry">Free postal entry</a></p>}</main>
     {footer && !bare && <Footer />}
-    {bottomNav && !bare && <BottomNav active={active} />}
   </div>
   {!bare && <CookieBanner />}
   <script>

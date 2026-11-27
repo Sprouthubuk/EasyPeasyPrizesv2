@@ -1,0 +1,15 @@
+---
+// Easy Peasy's page header band: pink mono eyebrow, big Sora title, a line under it,
+// and (on some pages) the pink wedge bleeding off the right edge.
+interface Props { eyebrow?: string; title: string; lead?: string; wedge?: boolean; center?: boolean }
+const { eyebrow, title, lead, wedge = false, center = false } = Astro.props;
+---
+<section class={`ep-ph ${center ? "ep-ph-c" : ""}`}>
+  {wedge && <span class="ep-wedge" aria-hidden="true"></span>}
+  <div class="wrap">
+    {eyebrow && <div class="eyebrow pk">{eyebrow}</div>}
+    <h1 class="h1">{title}</h1>
+    {lead && <p class="p">{lead}</p>}
+    <slot />
+  </div>
+</section>

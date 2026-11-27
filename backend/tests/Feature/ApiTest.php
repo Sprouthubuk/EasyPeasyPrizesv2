@@ -42,6 +42,15 @@ class ApiTest extends TestCase
             'instagram' => 'https://www.instagram.com/easypeasyprizes/', 'facebook' => 'https://www.facebook.com/groups/epfangroup',
             'youtube' => 'https://www.youtube.com/@easypeasyprizes', 'tiktok' => 'https://www.tiktok.com/@easypeasyprizes',
         ]);
+        // Header and home page figures: nothing shown until an admin types the real ones.
+        $this->getJson('/api/site')->assertJsonPath('homeBanner', null)->assertJsonPath('trust', [
+            'paidOutPounds' => null, 'winnersCount' => null, 'winnersSinceYear' => null, 'supportingName' => null, 'supportingUrl' => null,
+        ]);
+        \App\Models\Setting::put('paid_out_pounds', '3558960');
+        \App\Models\Setting::put('winners_count', 'lots');
+        \App\Models\Setting::put('home_banner', 'site/welcome.webp');
+        $this->getJson('/api/site')->assertJsonPath('trust.paidOutPounds', 3558960)->assertJsonPath('trust.winnersCount', null)
+            ->assertJsonPath('homeBanner.url', '/storage/site/welcome.webp');
         $list = $this->getJson('/api/competitions')->assertOk()->json('data');
         $this->assertSame([$draw->slug, $instant->slug], array_column($list, 'slug'));
         $this->assertSame('live', $list[1]['status']);

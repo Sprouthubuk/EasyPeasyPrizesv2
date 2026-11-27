@@ -1,0 +1,87 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Icon from "../components/Icon.astro";
+import type { DrawWinnerRow, InstantWinnerRow } from "../lib/types";
+import { ukDate } from "../lib/time";
+const { api, site } = Astro.locals;
+const [{ data: draws }, { data: instant }] = await Promise.all([
+  api.get<{ data: DrawWinnerRow[] }>("/api/winners/draws").catch(() => ({ data: [] as DrawWinnerRow[] })),
+  api.get<{ data: InstantWinnerRow[] }>("/api/winners/instant?limit=5").catch(() => ({ data: [] as InstantWinnerRow[] })),
+]);
+const recent = [...draws.map((w) => ({ name: w.name, prize: w.prizeName, at: w.at })), ...instant.map((w) => ({ name: w.name, prize: w.prizeName, at: w.at }))]
+  .sort((a, b) => b.at.localeCompare(a.at)).slice(0, 5);
+const trust = site.trust;
+const commitments: [string, string, string][] = [
+  ["shield", "Every draw published and audited", "Results are published as soon as each draw completes, with ticket numbers and winners kept on record for everyone to check."],
+  ["check", "Free postal entry on every competition", "Every competition can be entered free by post, with exactly the same chance of winning as a paid entry."],
+  ["trophy", "Winners published with ticket numbers", "Announced winners and the winning ticket number are added to our public record after each draw."],
+  ["clock", "Spending limits and breaks built in", "Set a daily, weekly or monthly cap, take a break, or self-exclude, all from your own account, any time."],
+];
+const confidence = [
+  "Registered in Scotland and run by a named team you can contact directly.",
+  "The maximum number of entries is published before every competition opens.",
+  "Instant win prizes are credited to your wallet straight away.",
+  "A free postal entry route on every single competition, no exceptions.",
+];
+---
+<Layout title="About Us" active="about" description="Meet Easy Peasy Prizes, a UK-registered prize competition company from Glasgow running live draws and instant wins.">
+  <section class="ep-ph" style="padding-bottom:56px"><div class="wrap">
+    <div class="eyebrow pk">About Easy Peasy Prizes</div>
+    <h1 class="h1 ep-about-h">Real Prizes. Real Winners. Easy Peasy.</h1>
+    <p class="p" style="margin-top:20px;max-width:560px;font-size:16px">Indulge in dream holidays and seize life-changing cash prizes: your chance to win big awaits!</p>
+    <div class="row wrapx g12" style="margin-top:28px"><a class="btn btn-y btn-lg" href="/competitions">View Competitions</a><a class="btn btn-o btn-lg" href="/winners">See Our Winners</a></div>
+  </div></section>
+
+  <section class="sec band"><div class="wrap">
+    <div class="eyebrow">The short version</div>
+    <h2 class="h2" style="margin-top:12px;font-size:clamp(28px,4vw,46px)">How We Keep It Fair</h2>
+    <p class="p" style="margin-top:12px;max-width:600px">Four commitments, in place before every competition opens: not marketing lines, but things this site actually does, every time.</p>
+    <div class="ep-fair">{commitments.map(([icon, title, copy]) => <article class="ep-fair-c"><span class="ep-fair-i"><Icon name={icon} size={18} /></span><h3 class="h3">{title}</h3><p>{copy}</p></article>)}</div>
+    {(trust?.paidOutPounds || trust?.winnersCount) && (
+      <div class="ep-stats n2" style="margin-top:48px">
+        {trust?.paidOutPounds ? <div class="ep-stat"><div class="d">£{trust.paidOutPounds.toLocaleString("en-GB")}</div><div>In Prizes</div></div> : null}
+        {trust?.winnersCount ? <div class="ep-stat"><div class="d">{trust.winnersCount.toLocaleString("en-GB")}</div><div>Total Winners</div></div> : null}
+      </div>
+    )}
+  </div></section>
+
+  <section class="sec"><div class="wrap ep-story">
+    <div>
+      <div class="eyebrow">Our story</div>
+      <h2 class="h2" style="margin-top:12px">Making Dreams Come True</h2>
+    </div>
+    <div class="stack g16">
+      <p class="p">Welcome to our competitions, where dreams become reality! We're dedicated to creating thrilling prize competitions that give everyone a chance to win big. Whether it's cash, tech, dream holidays or once-in-a-lifetime experiences, our goal is to make the extraordinary accessible to all.</p>
+      <p class="p">But we believe in giving back, too. Through our charity work we support causes close to our hearts, so while we're making dreams come true, we're also helping those in need.</p>
+      <blockquote class="ep-quote">“It's not just about the prizes, it's about making a difference.”</blockquote>
+    </div>
+  </div></section>
+
+  {trust?.supportingName && (
+    <section class="sec band"><div class="wrap"><div class="ep-charity">
+      <div class="eyebrow">Proudly supporting</div>
+      <h2 class="h2" style="margin-top:12px">{trust.supportingName}</h2>
+      {trust.supportingUrl && <a class="btn btn-o" style="margin-top:20px" href={trust.supportingUrl} rel="noopener" target="_blank">Find Out More</a>}
+    </div></div></section>
+  )}
+
+  <section class="sec"><div class="wrap">
+    <div class="ep-head" style="flex-direction:row;align-items:flex-end;justify-content:space-between"><div><h2 class="h2">Recent Winners</h2><p class="p" style="font-size:14px">Every result is published, ticket numbers included.</p></div><a class="btn btn-o dskf" href="/winners">All Results</a></div>
+    {recent.length ? <div class="ep-winners ep-winners5">{recent.map((w) => <article class="ep-winner"><span class="ep-winner-ico"><Icon name="trophy" size={18} /></span><b>{w.name}</b><span class="pk">{w.prize}</span><span class="ep-mono">{ukDate(w.at)}</span></article>)}</div> : <div class="card empty">No winners have been announced yet. Once a draw completes, the winner and ticket number are published here.</div>}
+  </div></section>
+
+  <section class="sec band"><div class="wrap ep-story">
+    <div><div class="eyebrow">Who we are</div><h2 class="h2" style="margin-top:12px">Play With Confidence</h2></div>
+    <div class="stack g16">
+      <ul class="ep-ticks">{confidence.map((t) => <li><Icon name="check" size={16} /><span>{t}</span></li>)}</ul>
+      <div class="card card-p stack g8"><b>Easy Peasy Prizes Ltd</b><span class="hint" style="font-size:13px">Registered in Scotland · Company No. SC747746</span><span class="hint" style="font-size:13px">Clyde Offices 2nd Floor, 48 West George Street, Glasgow, G2 1BP</span><a class="tap" style="padding:0;justify-content:flex-start" href="/contact">Contact us</a></div>
+    </div>
+  </div></section>
+
+  <section class="ep-next-cta"><div class="wrap">
+    <h2 class="h2">Ready To Play?</h2>
+    <p class="p">Browse the latest live competitions and choose your next prize.</p>
+    <a class="btn btn-y btn-lg" href="/competitions">View Competitions</a>
+    <p class="hint" style="margin-top:20px;font-size:12px">18+, UK residents only. A free postal entry route is available on every competition. Please play responsibly.</p>
+  </div></section>
+</Layout>

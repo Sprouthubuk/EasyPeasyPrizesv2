@@ -30,6 +30,14 @@ class Setting extends Model
         'youtube_url' => 'https://www.youtube.com/@easypeasyprizes',
         'tiktok_url' => 'https://www.tiktok.com/@easypeasyprizes',
         'support_email' => null,
+        // Home page and header (Easy Peasy's look): empty = not shown. Figures are the client's own, typed in the admin.
+        'home_banner' => null,
+        'home_banner_alt' => null,
+        'paid_out_pounds' => null,
+        'winners_count' => null,
+        'winners_since_year' => null,
+        'supporting_name' => null,
+        'supporting_url' => null,
         // Admin reports: a win at or above this sends an alert (Reports::bigWinPence); blank addresses = the usual alert addresses.
         'big_win_alert_pence' => '10000',
         'big_win_alert_emails' => null,

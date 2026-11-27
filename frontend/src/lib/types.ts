@@ -119,6 +119,10 @@ export interface SiteInfo {
   featuredSlug: string | null;
   socials: { instagram: string | null; facebook: string | null; youtube: string | null; tiktok: string | null };
   supportEmail: string | null;
+  /** The home page welcome banner uploaded in Admin → Settings; null when none (the featured competition shows instead). */
+  homeBanner: { url: string; alt: string } | null;
+  /** The client's own figures from Admin → Settings; each is null (and not shown) until an admin types it. */
+  trust: { paidOutPounds: number | null; winnersCount: number | null; winnersSinceYear: number | null; supportingName: string | null; supportingUrl: string | null };
   /** Meta Pixel ID from the admin; null when none is set (then nothing from Meta ever loads). */
   metaPixelId: string | null;
   /** Lucky Dip (lucky dip): null while the feature is off. `available` is false when fewer than two draws can go in. */

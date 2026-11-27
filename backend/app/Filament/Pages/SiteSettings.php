@@ -9,6 +9,7 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
@@ -38,7 +39,7 @@ class SiteSettings extends Page
     private const MONEY = ['min_deposit_pence' => 'Minimum top up', 'min_card_pence' => 'Minimum card payment', 'min_withdrawal_pence' => 'Minimum withdrawal',
         'max_top_up_pence' => 'Largest top up'];
 
-    private const TEXT = ['featured_slug', 'instagram_url', 'facebook_url', 'youtube_url', 'tiktok_url', 'support_email', 'bonus_expiry_days', 'meta_pixel_id', 'meta_test_event_code',
+    private const TEXT = ['featured_slug', 'instagram_url', 'facebook_url', 'youtube_url', 'tiktok_url', 'support_email', 'home_banner', 'home_banner_alt', 'paid_out_pounds', 'winners_count', 'winners_since_year', 'supporting_name', 'supporting_url', 'bonus_expiry_days', 'meta_pixel_id', 'meta_test_event_code',
         'gimme_box_chips', 'gimme_box_min_pence', 'gimme_box_max_pence', 'gimme_box_bonus_pct', 'gimme_box_max_sold_pct', 'gimme_box_slow_boost_pct',
         'gimme_box_hold_minutes', 'gimme_box_share_of_sales_pct',
         'referral_reward_type', 'referral_reward_tickets', 'referral_reward_credit_pence', 'referral_min_purchase_pence', 'referral_monthly_cap',
@@ -93,6 +94,17 @@ class SiteSettings extends Page
                 TextInput::make('tiktok_url')->label('TikTok')->url()->rule('starts_with:https://'),
                 TextInput::make('meta_pixel_id')->label('Meta Pixel ID')->regex('/^\d{10,20}$/')
                     ->helperText('Numbers only, from Meta Events Manager. Leave empty for no Pixel. It only loads for visitors who accept marketing cookies.'),
+            ]),
+            Section::make('Home Page And Header')->description('The welcome banner at the top of the home page and the figures in the top bar and home page. Leave a box empty to hide it. Only enter real figures.')->columns(2)->components([
+                FileUpload::make('home_banner')->label('Welcome banner (wide picture, about 1672 × 941)')->image()->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                    ->disk('public')->directory('site')->maxSize(4096)->columnSpanFull()
+                    ->helperText('Shown full width at the top of the home page and links to all competitions. Empty: the featured competition is shown instead.'),
+                TextInput::make('home_banner_alt')->label('Banner description (for screen readers)')->maxLength(200)->columnSpanFull(),
+                TextInput::make('paid_out_pounds')->label('Total paid out to winners (£, whole pounds)')->integer()->minValue(0)->maxValue(1000000000),
+                TextInput::make('winners_count')->label('Number of winners')->integer()->minValue(0)->maxValue(100000000),
+                TextInput::make('winners_since_year')->label('Winners since (year)')->integer()->minValue(2000)->maxValue(2100),
+                TextInput::make('supporting_name')->label('Proudly supporting (charity name)')->maxLength(80),
+                TextInput::make('supporting_url')->label('Charity web address')->url()->rule('starts_with:https://'),
             ]),
             Section::make('Meta tracking (server)')->description(fn () => self::metaStatus())->columns(2)->collapsible()->components([
                 TextInput::make('meta_test_event_code')->label('Meta test event code')->regex('/^[A-Za-z0-9]{4,20}$/')
