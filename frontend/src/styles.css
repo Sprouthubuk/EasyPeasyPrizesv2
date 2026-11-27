@@ -823,3 +823,76 @@ a{color:var(--ep-cyan)}a:hover{color:var(--ep-pink)}
 @media (min-width:1024px){.ep-details{grid-template-columns:280px minmax(0,1fr);gap:40px}}
 .info .acd .ab a{color:var(--ep-cyan)}
 .ft .ft-soc a{justify-content:center;min-height:44px}
+/* Results */
+.ep-reshero{padding:40px 0 8px;background:radial-gradient(circle at 0 0,rgba(255,30,140,.07),transparent 50%)}
+@media (min-width:1024px){.ep-reshero{padding:72px 0 16px}}
+.ep-badge{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,30,140,.5);background:rgba(255,30,140,.08);color:var(--ep-cyan);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.ep-badge-c{border-color:rgba(63,216,255,.5);background:transparent;text-transform:none;letter-spacing:0}
+.ep-big{margin-top:16px}
+@media (min-width:1024px){.ep-big{font-size:64px}}
+.ep-lead{margin-top:16px;max-width:600px;font-size:17px;font-weight:400}
+.ep-resstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:32px;max-width:680px}
+.ep-resstats>div{border:1px solid var(--ep-line2);border-radius:18px;padding:14px 16px;background:rgba(14,17,35,.6)}
+.ep-resstats .label-caps{display:flex;align-items:center;gap:6px;color:var(--ep-soft)}
+.ep-resstats .label-caps svg{color:var(--ep-cyan);flex:none}
+.ep-resstats b{display:block;margin-top:8px;font-size:22px}
+.ep-results{display:grid;gap:16px}
+@media (min-width:900px){.ep-results{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ep-result{display:flex;gap:16px;align-items:flex-start;padding:20px;border-radius:18px;border:1px solid var(--ep-line);background:var(--ep-ink)}
+.ep-result-av{flex:none;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--ep-grad);color:#fff}
+.ep-result-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.ep-result-n{font-size:20px}
+.ep-result-p{color:var(--ep-soft);font-size:14px}
+.ep-verified{flex:none;align-self:center;border:1px solid var(--ep-line2);border-radius:999px;padding:4px 12px;font-size:12px;color:var(--ep-soft);text-decoration:none}
+.ep-next-cta{padding:64px 0;border-top:1px solid var(--ep-line);text-align:center}
+.ep-next-cta .h2{font-size:32px}
+@media (min-width:1024px){.ep-next-cta{padding:80px 0}.ep-next-cta .h2{font-size:40px}}
+.ep-next-cta .p{margin:16px 0 28px}
+@media (max-width:639px){main .ep-next-cta .h2,main .ep-next-cta .p{text-align:center}}
+.ep-feed{display:flex;align-items:center;gap:16px;padding:16px;border-radius:18px;border:1px solid var(--ep-line);background:var(--ep-ink)}
+.ep-feed-ico{flex:none;width:52px;height:52px;border-radius:14px;border:1px solid var(--ep-line2);background:var(--ep-card);color:var(--ep-cyan);display:flex;align-items:center;justify-content:center}
+.ep-feed-t{font-size:15px;color:var(--ep-soft)}
+.ep-feed-t b{color:var(--ep-text);font-weight:700}
+.ep-feed-t .pk{font-weight:700}
+/* Page header band */
+.ep-ph{position:relative;overflow:hidden;background:var(--ep-band);border-bottom:1px solid var(--ep-line);padding:40px 0 36px}
+@media (min-width:1024px){.ep-ph{padding:56px 0 52px}}
+.ep-ph .eyebrow{margin-bottom:12px}
+.eyebrow.pk{color:var(--ep-pink)}
+.ep-ph .p{margin-top:14px;max-width:620px;font-size:15px}
+.ep-ph-c{text-align:center}.ep-ph-c .p{margin-left:auto;margin-right:auto}
+@media (max-width:639px){main .ep-ph-c .h1,main .ep-ph-c .p,main .ep-ph-c .eyebrow{text-align:center}}
+.ep-wedge{position:absolute;top:0;bottom:0;right:-60px;width:120px;background:var(--ep-grad);transform:skewX(-14deg);pointer-events:none}
+@media (min-width:1024px){.ep-wedge{right:-20px;width:160px}}
+.ep-ph .wrap{position:relative}
+.ep-ph:has(.ep-wedge) .wrap{padding-right:90px}
+/* About */
+.ep-about-h{max-width:1000px}
+@media (min-width:1024px){.ep-about-h{font-size:72px}}
+.ep-fair{display:grid;gap:16px;margin-top:32px}
+@media (min-width:768px){.ep-fair{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ep-fair-c{padding:24px;border-radius:18px;border:1px solid var(--ep-line);background:var(--ep-card)}
+.ep-fair-i{width:40px;height:40px;border-radius:12px;border:1px solid var(--ep-line2);background:var(--ep-surface);color:var(--ep-cyan);display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.ep-fair-c p{margin:10px 0 0;font-size:13px;line-height:1.6;color:var(--ep-muted)}
+.ep-story{display:grid;gap:24px}
+@media (min-width:1024px){.ep-story{grid-template-columns:320px minmax(0,1fr);gap:48px}}
+.ep-quote{margin:8px 0 0;padding:4px 0 4px 20px;border-left:3px solid var(--ep-pink);font-family:Sora,sans-serif;font-weight:700;font-size:20px;line-height:1.35;color:var(--ep-text)}
+.ep-charity{max-width:720px}
+.ep-ticks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.ep-ticks li{display:flex;gap:12px;align-items:flex-start;color:var(--ep-soft);font-size:15px;line-height:1.5}
+.ep-ticks svg{color:var(--ep-cyan);flex:none;margin-top:3px}
+@media (min-width:1024px){.ep-winners5{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.stack>.tag{align-self:flex-start}
+/* Sign in, join and password pages: one centred card on a soft pink and cyan glow. */
+.g:has(.ep-auth){background:radial-gradient(circle at 15% 15%,rgba(255,30,140,.12),transparent 40%),radial-gradient(circle at 85% 85%,rgba(63,216,255,.08),transparent 40%),#05060E}
+.g:has(.ep-auth) .auth-hd{background:transparent;border-bottom:0}
+.ep-auth{min-height:calc(100vh - 64px);padding:12px 0 40px}
+.ep-auth>.sec{padding-top:12px!important;padding-bottom:16px}
+.ep-auth .narrow{background:var(--ep-card);border:1px solid var(--ep-line);border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.45);padding:28px 20px!important;max-width:460px!important;width:calc(100% - 32px)}
+@media (min-width:640px){.ep-auth .narrow{padding:32px!important}}
+.ep-auth .narrow::before{content:"";display:block;height:64px;background:url(/logo-sm.webp) center/contain no-repeat;margin-bottom:4px}
+.ep-auth .h1,.ep-auth .h1-one{font-size:26px!important;text-align:center!important;white-space:normal}
+.ep-auth .gg-rise:has(> .h1) .p{text-align:center!important;font-size:14px}
+.ep-auth-foot{text-align:center;font-size:12px;color:var(--ep-dim);margin:8px 16px 0}
+.ep-auth-foot a{color:var(--ep-text);text-decoration:underline;text-underline-offset:3px}
+.g:has(.ep-auth) .auth-hd .logo{display:none}

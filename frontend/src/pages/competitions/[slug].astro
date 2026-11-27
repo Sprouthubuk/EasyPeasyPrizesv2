@@ -31,7 +31,6 @@ const opensLater = c.status === "scheduled" && c.opensAt ? c.opensAt : null;
 const presets = c.presets?.length ? c.presets : isDraw ? [1, 5, 10, 25] : [5, 10, 25, 50];
 const endCount = c.endPrize?.count ?? 0;
 const endPrizeLine = c.endPrize ? `${endCount > 1 ? `${endCount} × ` : ""}${formatPence(c.endPrize.valuePence, { short: false })}` : "";
-const [first, ...rest] = c.title.split(" – ");
 const ticketCounts = (max: number, sold: number, left: number) => `Max ${max.toLocaleString("en-GB")} tickets · ${sold.toLocaleString("en-GB")} sold · ${left.toLocaleString("en-GB")} left`;
 ---
 <Layout title={c.title} fullTitle={pageTitle(competitionTitle(c))} active="competitions" description={competitionDescription(c)} shareImage={c.image} jsonLd={[breadcrumbLd(new URL(Astro.site ?? Astro.url).origin, [["Home", "/"], [isDraw ? "Live Draws" : "Instant Wins", `/competitions?type=${isDraw ? "draw" : "instant"}`], [c.title, `/competitions/${c.slug}`]])]}>

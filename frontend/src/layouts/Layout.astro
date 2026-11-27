@@ -73,7 +73,7 @@ const verification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
   <a class="skip" href="#main">Skip to content</a>
   <div class="g">
     {!bare && <Header active={active} variant={header} back={headerBack} title={headerTitle} />}
-    <main id="main"><slot /></main>
+    <main id="main" class={header === "auth" ? "ep-auth" : undefined}><slot />{header === "auth" && <p class="ep-auth-foot">18+ only · Please play responsibly · <a href="https://www.begambleaware.org" rel="noopener" target="_blank">BeGambleAware</a> · <a href="/free-entry">Free postal entry</a></p>}</main>
     {footer && !bare && <Footer />}
   </div>
   {!bare && <CookieBanner />}

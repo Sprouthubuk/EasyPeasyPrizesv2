@@ -13,17 +13,17 @@ const PUBLIC_PAGES: [string, RegExp][] = [
   ["/competitions?type=draw", /Live Draws 3/],
   ["/competitions?q=bush", /Bush Bucks/],
   ["/competitions/bush-bucks-jungle-trial", /Instant Wins/],
-  ["/competitions/lush-snow-fairy-wonderland", /Drawn Live/],
+  ["/competitions/lush-snow-fairy-wonderland", /How the draw works/],
   ["/instant-winners", /Instant Winners/],
-  ["/winners", /Our Winners/],
+  ["/winners", /Draw Results/],
   ["/entry-lists", /Entry Lists/],
   ["/entry-lists/lush-snow-fairy-wonderland", /\d+% sold/],
   ["/entry-lists/bush-bucks-jungle-trial", /Won Bug Bite/],
   ["/competitions/bush-bucks-jungle-trial/winning-numbers", /Winning Numbers[\s\S]*prizes won[\s\S]*#\d+/],
   ["/competitions/bush-bucks-jungle-trial/winning-numbers?show=won", /Emmie A\./],
   ["/how-it-works", /How It Works/],
-  ["/faq", /Got A Question/],
-  ["/contact", /Talk To Us/],
+  ["/faq", /Frequently Asked Questions/],
+  ["/contact", /Get In Touch/],
   ["/free-entry", /Free Postal Entry/],
   ["/legal/terms", /Terms &(amp;)? Conditions/],
   ["/menu", /All Competitions/],
@@ -91,30 +91,30 @@ describe("site-wide rules", () => {
     const { html } = await new Browser(site.origin).page("/");
     expect(html).toContain("data-countdown=");
     expect(html).toContain("Bush Bucks – Jungle Trial");
-    // Two plain titles, no filters and no See All: every instant win game, then every live draw.
-    expect(html).toMatch(/<span class="np">Instant<\/span> Wins/);
-    expect(html).toMatch(/<span class="nc">Live<\/span> Draws/);
-    expect(html).not.toContain('aria-label="Filter games"');
-    expect(html).not.toMatch(/See All \d/);
-    // The featured section's strip is the live winners feed (names, prize, game, when), not the prize list.
-    expect(html).toMatch(/Live <b>Winners<\/b>/);
-    expect(html).toMatch(/Emmie A\.<\/b> won <b class="ny">£0\.50 site credit<\/b><small>Pop For Pennies · /);
-    expect(html).not.toContain('aria-label="Prize ladder"');
+    // Easy Peasy's layout (Nov 2026): next draws, one Competitions grid with the old site's four filters,
+    // How It Works, the admin's own figures, and recent winners.
+    expect(html).toMatch(/<h2 class="h2">Competitions<\/h2>/);
+    expect(html).toContain('aria-label="Filter competitions"');
+    expect(text(html)).toMatch(/Ending Soon\s*Instant Wins\s*Live Draws\s*All/);
+    expect(html).toMatch(/class="ep-draw"/); // the next draws strip
+    expect(text(html)).toMatch(/£3,558,960/); // paid out, from Admin → Settings (mock), in the top bar and the stats band
+    expect(text(html)).toMatch(/Proudly supporting\s*Fleming Family Foundations/);
+    expect(text(html)).toMatch(/Recent Winners[\s\S]*Emmie A\.[\s\S]*£0\.50 site credit/);
   });
   it("competition cards show price, wins, highlight, time left and % sold, but not the ticket counts", async () => {
     const { html } = await new Browser(site.origin).page("/competitions");
     const t = text(html);
     expect(t).toMatch(/25p/);
-    expect(t).toMatch(/2,516 instant wins/); // the count on the pill, with the words for screen readers
-    expect(t).toMatch(/Top Prize £/);
+    expect(t).toMatch(/Win up to £/);
+    expect(t).toMatch(/per entry/);
     expect(t).toMatch(/\d+d \d+h/);
     expect(t).toMatch(/2% sold/);
     expect(t).not.toMatch(/\d ?left|tickets in total|max entries/i); // counts are on the competition page only (owner, 22 Nov 2026)
     expect(t).toMatch(/Buy 10 Get 15 Free/); // a live draw card names its Our Pick bundle
     expect(html).toContain("data-ends=");
-    // No game tag on a card (only live draws keep their Live Draw tag), and no limit per person anywhere.
-    expect(html).not.toMatch(/<span class="gt">/);
-    expect(html).toContain('<span class="gt cy">');
+    // Every card carries its solid type pill (Easy Peasy's CompetitionPill), and no limit per person anywhere.
+    expect(html).toContain('<span class="pill pill-live">Live Draw</span>');
+    expect(html).toContain('<span class="pill pill-iw">Instant Win</span>');
     expect(t).not.toMatch(/per person/i);
     // A competition with no per-person limit doesn't mention one.
     expect(text((await new Browser(site.origin).page("/competitions/bush-bucks-jungle-trial")).html)).not.toMatch(/per person/i);
@@ -122,12 +122,13 @@ describe("site-wide rules", () => {
   it("a prize boost shows on the card, the page and the winning numbers (owner, 23 Nov 2026)", async () => {
     const cards = (await new Browser(site.origin).page("/competitions")).html;
     expect(cards).toContain('data-testid="boost-badge"');
-    expect(text(cards)).toMatch(/🔥 Prize Boost[\s\S]*£2,600 extra instant wins added/);
-    expect(text(cards)).toMatch(/2,716/);
+    expect(text(cards)).toMatch(/Prize Boost[\s\S]*£2,600 extra instant wins added/);
+    expect(cards).not.toContain("🔥"); // no emoji in the UI
     const { html } = await new Browser(site.origin).page("/competitions/demis-diamond-dosh");
     const t = text(html);
     expect(html).toContain('data-testid="boost-banner"');
-    expect(t).toMatch(/🔥 Prize Boost – £2,600 extra instant wins added: 200 more prizes since \d+ \w{3}/);
+    expect(t).toMatch(/of 2,716 instant prizes left/); // boosted prizes count in the total
+    expect(t).toMatch(/Prize Boost – £2,600 extra instant wins added: 200 more prizes since \d+ \w{3}/);
     expect(t).toMatch(/Mega Gem\s*Added \d+ \w{3}/);
     expect(t).toMatch(/Renamed prizes: Gem Fiver \(Gem Bonus in the fair play record\)\./);
     expect(t).toMatch(/How they were added[\s\S]*Verity, added 200 instant prizes[\s\S]*round 23456789/);
@@ -143,8 +144,9 @@ describe("site-wide rules", () => {
     const { html } = await new Browser(site.origin).page("/competitions/bush-bucks-jungle-trial");
     const t = text(html);
     expect(html).not.toContain("Try The Game Free");
-    expect(html).not.toContain('class="acd"');
     expect(html).toContain('data-testid="more-information"');
+    // Competition Details as the old site: one open section, then How the draw works, limits, postal entry and terms.
+    expect(t).toMatch(/Competition Details[\s\S]*How the draw works[\s\S]*Entry limits[\s\S]*Free postal entry[\s\S]*Terms & conditions/);
     expect(t).toMatch(/Instant prizes left to win/);
     expect(t).toMatch(/Left to win/);
     expect(t).toMatch(/of 1,500 found/);
@@ -171,7 +173,7 @@ describe("site-wide rules", () => {
     expect(t).toMatch(/25 tickets for £5\.90/);
     expect(t).toMatch(/Save £8\.85/);
     expect(t).toMatch(/Bundle and free tickets are entered into the draw exactly like paid tickets/);
-    expect(t).toMatch(/8% SOLD/);
+    expect(t).toMatch(/8% sold/);
     expect(t).toMatch(/Max 50,000 tickets · 4,000 sold · 46,000 left · Max 100 per person/); // quiet line under the bar
     expect(t).toMatch(/Max 100 per person/); // and in the ticket picker
     expect(html).toContain("Or choose your own amount"); // a typed amount, even with bundles
