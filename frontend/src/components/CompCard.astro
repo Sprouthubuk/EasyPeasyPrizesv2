@@ -1,7 +1,8 @@
 ---
-import Icon from "./Icon.astro";
+// Easy Peasy's competition card: square picture with solid pills, title, "Win up to" line,
+// the price per entry, % sold with the time left, the draw date and one Enter Now button.
 import type { CompetitionSummary } from "../lib/types";
-import { formatCount, formatPence } from "../lib/money";
+import { formatMoney, formatPence } from "../lib/money";
 import { endsIn, ukWhen } from "../lib/time";
 interface Props { c: CompetitionSummary }
 const { c } = Astro.props;
@@ -9,43 +10,38 @@ const live = c.type === "draw";
 const href = `/competitions/${c.slug}`;
 const soon = c.status === "scheduled" && c.opensAt ? c.opensAt : null;
 const open = c.status === "live";
+const soldOut = c.status === "sold_out";
 const sold = Math.max(0, Math.min(100, c.soldPercent));
-// The strip across the foot of the picture: red when it closes within a day and a half.
 const msLeft = new Date(c.closesAt).getTime() - Date.now();
-const hot = open && msLeft > 0 && msLeft < 36 * 36e5;
-// Today / Tomorrow with the time; further off, just the day ("Sat 28 Nov") so it fits a phone card.
-const when = (iso: string) => { const w = ukWhen(iso); return /^(Today|Tomorrow)/.test(w) ? w : w.split(",")[0]; };
-// A strip across the foot of the picture only when there's something to flag: ending within a day
-// and a half (red), opening later, sold out or closed.
-const strip = soon ? `Opens ${when(soon)}` : c.status === "sold_out" ? "Sold Out" : !open ? "Closed" : hot ? `Ends ${when(c.closesAt)}` : null;
-// The highlight line: an instant win's end prize (or its top prize), or what a live draw is worth.
+const endingSoon = open && msLeft > 0 && msLeft < 864e5;
 const money = (p: number) => formatPence(p, { short: false });
-const highlight = live
-  ? (c.topPrizePence ? `Worth ${money(c.topPrizePence)}` : null)
-  : c.endPrize ? `${c.endPrize.count > 1 ? `${c.endPrize.count} × ` : ""}${money(c.endPrize.valuePence)} End Prize`
-  : c.topPrizePence ? `Top Prize ${money(c.topPrizePence)}` : null;
-// When: the draw date for a live draw or an end prize, otherwise when the game closes.
-const whenLine: [string, string] = (live || c.endPrize) && (c.drawAt ?? c.closesAt) ? ["Draw", ukWhen(c.drawAt ?? c.closesAt)] : ["Ends", ukWhen(c.closesAt)];
+// The pink line under the title: the headline prize, never a repeat of the title.
+const headline = c.endPrize ? `${c.endPrize.count > 1 ? `${c.endPrize.count} × ` : ""}${money(c.endPrize.valuePence)} end prize`
+  : c.topPrizePence ? (live ? `Worth ${money(c.topPrizePence)}` : `Win up to ${money(c.topPrizePence)}`) : null;
+// The flag across the foot of the picture: a cash prize, or the first words of the title.
+const cash = c.title.match(/^£[\d,.]+/);
+const flag = soldOut ? "Sold Out" : !open && !soon ? "Closed" : soon ? `Opens ${ukWhen(soon)}` : cash ? `${cash[0]} Cash` : c.title.split(" ").slice(0, 3).join(" ");
+const drawWhen = c.drawAt ?? c.closesAt;
 ---
-<a class="cc gg-card" href={href}>
+<a class={`cc gg-card ${soldOut || (!open && !soon) ? "cc-done" : ""}`} href={href}>
   <div class="im">
-    <img src={c.imageSmall} srcset={c.imageSrcset ?? undefined} sizes="(min-width:1024px) 300px, (min-width:640px) 33vw, 50vw" alt={c.title} loading="lazy" decoding="async" width="400" height="400">
-    {live && <span class="gt cy"><Icon name="live" size={11} stroke={2.6} />Live Draw</span>}
-    {!live && c.boost && <span class="gt pb" data-testid="boost-badge">🔥 Prize Boost</span>}
-    {strip && <div class={`st ${hot && !soon ? "hot" : ""}`}><Icon name="clock" size={12} stroke={2.6} /><span>{strip}</span></div>}
+    <img src={c.imageSmall} srcset={c.imageSrcset ?? undefined} sizes="(min-width:1280px) 330px, (min-width:1024px) 30vw, 50vw" alt={c.title} loading="lazy" decoding="async" width="400" height="400">
+    <div class="pills">
+      <span class={`pill ${live ? "pill-live" : "pill-iw"}`}>{live ? "Live Draw" : "Instant Win"}</span>
+      {!live && c.boost && <span class="pill pill-boost" data-testid="boost-badge">Prize Boost</span>}
+    </div>
+    {endingSoon && <span class="pill pill-iw pill-tr">Ending Soon</span>}
+    <span class={`pill pill-flag ${soldOut || (!open && !soon) ? "pill-out" : "pill-iw"}`}>{flag}</span>
   </div>
   <div class="bd">
-    <div class="pr">
-      <b class={`pp ${live ? "nc" : "np"}`}>{formatPence(c.pricePence)}</b>
-      {!live && c.prizeCount ? <span class="pl" title={`${formatCount(c.prizeCount)} instant ${c.prizeCount === 1 ? "win" : "wins"}`}><Icon name="bolt" size={11} stroke={3} />{formatCount(c.prizeCount)}<span class="sr-only"> instant {c.prizeCount === 1 ? "win" : "wins"}</span></span> : null}
-    </div>
     <div class="tt">{c.title}</div>
-    {highlight && <div class={`hl ${live ? "nc" : ""}`}><span aria-hidden="true">★</span>{highlight}</div>}
+    {headline && <div class="hl">{headline}</div>}
     {!live && c.boost && <div class="pbl">{money(c.boost.addedPence)} extra instant wins added</div>}
-    <div class="wh"><span>{whenLine[0]}</span>{" "}<b>{whenLine[1]}</b></div>
-    {open && <div class="en"><span class="dt"></span><b data-ends={c.closesAt}>{endsIn(c.closesAt)}</b></div>}
-    <div class={`bar ${live ? "cy" : ""}`}><div class="gg-shine" style={`width:${sold > 0 ? Math.max(sold, 2) : 0}%`}></div></div>
-    <div class="sl"><span><b>{sold}%</b> sold</span>{open && sold >= 90 ? <span class="ag">Almost gone!</span> : c.featuredBundle ? <span class="bb">{c.featuredBundle.label}</span> : null}</div>
-    <span class="btn btn-y btn-block go">{!open && !soon ? "View" : soon ? "See The Prizes" : live ? "Enter Now" : "Play Now"}{(open || soon) && <span aria-hidden="true" class="star">★</span>}</span>
+    <div class="pr"><b class="pp">{formatMoney(c.pricePence)}</b><span>per entry</span></div>
+    <div class="sl"><span><b>{sold}%</b> sold</span>{open ? <span data-ends={c.closesAt}>{endsIn(c.closesAt)}</span> : soon ? <span>Opens soon</span> : <span>Closed</span>}</div>
+    <div class="bar"><div style={`width:${sold > 0 ? Math.max(sold, 2) : 0}%`}></div></div>
+    {open && sold >= 90 ? <div class="ag">Almost gone!</div> : c.featuredBundle && open ? <div class="bb">{c.featuredBundle.label}</div> : null}
+    <div class="wh">Draw {ukWhen(drawWhen)}</div>
+    <span class={`btn btn-block go ${open || soon ? "btn-y" : "btn-o"}`}>{!open && !soon ? "View Result" : soon ? "See The Prizes" : "Enter Now"}</span>
   </div>
 </a>

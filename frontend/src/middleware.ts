@@ -13,6 +13,8 @@ const FALLBACK_SITE: SiteInfo = {
   featuredSlug: null,
   socials: { instagram: null, facebook: null, youtube: null, tiktok: null },
   supportEmail: null,
+  homeBanner: null,
+  trust: { paidOutPounds: null, winnersCount: null, winnersSinceYear: null, supportingName: null, supportingUrl: null },
   metaPixelId: null,
 };
 
