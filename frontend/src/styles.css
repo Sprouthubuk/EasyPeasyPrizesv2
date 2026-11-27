@@ -767,7 +767,7 @@ a{color:var(--ep-cyan)}a:hover{color:var(--ep-pink)}
 .ep-search .inp{padding-left:40px;height:48px}
 @media (min-width:1024px){.ep-search{width:220px;flex:none}}
 .ep-sort{position:relative;display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 14px;border-radius:14px;border:1px solid var(--ep-line2);background:var(--ep-surface);color:var(--ep-dim);font-size:13px}
-.ep-sort select{appearance:none;background:transparent;border:0;color:var(--ep-text);font:600 14px Manrope,sans-serif;padding-right:18px;cursor:pointer;height:100%}
+.ep-sort select{appearance:none;background:transparent;border:0;color:var(--ep-text);font:600 16px Manrope,sans-serif;padding-right:18px;cursor:pointer;height:100%}
 .ep-sort select option{background:#0E1123}
 .ep-sort svg{position:absolute;right:12px;pointer-events:none;color:var(--ep-text)}
 .ep-filterbar{background:var(--ep-band);border-bottom:1px solid var(--ep-line);padding:12px 0}
@@ -898,3 +898,6 @@ a{color:var(--ep-cyan)}a:hover{color:var(--ep-pink)}
 .g:has(.ep-auth) .auth-hd .logo{display:none}
 .ep-tabs a,.ep-tabs button{min-height:40px}
 @media (min-width:1024px){.ft a{min-height:40px}.ft ul{gap:0}}
+.ab-p{margin:0;font:inherit;color:inherit}
+.ft-cols a{display:inline-flex;align-items:center;min-width:44px;justify-content:flex-start}
+.nav a{min-width:44px;text-align:center;display:inline-flex;justify-content:center}
