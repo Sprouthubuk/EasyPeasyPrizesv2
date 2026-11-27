@@ -15,7 +15,10 @@ routes by path (`nginx.conf`). Same domain, so Sanctum cookies just work.
    the secrets (Cashflows, Resend, Verity keys). `SESSION_DOMAIN=easypeasyprizes.com`,
    `SANCTUM_STATEFUL_DOMAINS=easypeasyprizes.com`, `APP_URL=https://easypeasyprizes.com`.
 5. **Nginx**: edit the site's config with `nginx.conf` — both blocks: the main site and the private
-   listener on 127.0.0.1:8080 that Astro uses to reach Laravel.
+   listener on 127.0.0.1:8080 that Astro uses to reach Laravel. Forge's editor only edits inside the
+   site's `server { }`, and a separate listener block needs root; without root, put
+   `listen 127.0.0.1:8080;` inside the main block instead (as `nginx-staging-site.conf` does, live on
+   easypeasy.on-forge.com): `/api` and `/sanctum` reach PHP the same way.
 6. **Background processes**: Astro and the queue worker (`astro-daemon.conf`).
 7. **Scheduler**: Forge → Scheduler → `php artisan schedule:run` every minute (expires unpaid
    orders, Verity schedules, bonus expiry, health email).
