@@ -7,6 +7,9 @@ cd $FORGE_RELEASE_DIRECTORY
 # The site's folder (/home/forge/<site>), worked out from the release folder (<site>/releases/<id>).
 # Not FORGE_SITE_PATH: in zero-downtime mode that is <site>/current, which points at the OLD release.
 SITE_ROOT="$(cd "$FORGE_RELEASE_DIRECTORY/../.." && pwd)"
+# First deploy: Forge can only load the .env for this script once <site>/current exists, so read the
+# public address from the shared .env when it is not already set.
+if [ -z "${FRONTEND_URL:-}" ] && [ -f "$SITE_ROOT/.env" ]; then FRONTEND_URL="$(grep -E '^FRONTEND_URL=' "$SITE_ROOT/.env" | tail -n1 | cut -d= -f2- | tr -d '"\r')"; fi
 
 # --- Shared files: the environment and Laravel's storage survive every release ---
 ln -sfn "$SITE_ROOT/.env" backend/.env
